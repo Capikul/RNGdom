@@ -1,0 +1,2973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RNGdom</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    :root {
+        --bg: #0f0e14;
+        --panel: #242228;
+        --panel-hover: #29272e;
+        --border: #45424b;
+        --text: #f1f1f4;
+        --muted: #9b98a5;
+
+        --pink: #ff1493;
+        --purple: #8b5cf6;
+        --blue: #2684ff;
+        --green: #00d99b;
+        --orange: #ff9d00;
+
+        /* rarity palette */
+        --trash: #7a7782;
+        --common: #c9c6d1;
+        --uncommon: #00d6a0;
+        --rare: #448eff;
+        --legendary: #ffb020;
+        --mythical: #ef4fe0;
+    }
+
+    html {
+        background: var(--bg);
+    }
+
+    body {
+        min-height: 100vh;
+
+        background: var(--bg);
+        color: var(--text);
+
+        font-family:
+            Inter,
+            ui-sans-serif,
+            system-ui,
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+
+        overflow-x: hidden;
+    }
+
+    button {
+        font: inherit;
+    }
+
+    a {
+        color: inherit;
+    }
+
+    /* =========================================
+       NAVBAR
+    ========================================= */
+
+    .navbar {
+        position: fixed;
+
+        top: 0;
+        left: 0;
+        right: 0;
+
+        height: 40px;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 0 14px;
+
+        z-index: 100;
+
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .nav-left,
+    .nav-right {
+        display: flex;
+        align-items: center;
+    }
+
+    .nav-left {
+        gap: 11px;
+    }
+
+    .nav-icon {
+        width: 20px;
+        height: 20px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        color: #9998a0;
+
+        font-size: 15px;
+    }
+
+    .logo {
+        font-size: 19px;
+        font-weight: 900;
+
+        letter-spacing: 1px;
+    }
+
+    /* =========================================
+       THEME
+    ========================================= */
+
+    .theme-switcher {
+        display: flex;
+
+        height: 30px;
+
+        border: 1px solid #48464e;
+        border-radius: 4px;
+
+        overflow: hidden;
+    }
+
+    .theme-btn {
+        width: 28px;
+
+        border: 0;
+        border-right: 1px solid #48464e;
+
+        background: transparent;
+
+        color: #aaa;
+
+        cursor: pointer;
+
+        font-size: 14px;
+    }
+
+    .theme-btn:last-child {
+        border-right: 0;
+    }
+
+    .theme-btn.active {
+        background: #e9e9e9;
+        color: #202027;
+    }
+
+    /* =========================================
+       HOME
+    ========================================= */
+
+    #homeScreen {
+        width: 100%;
+        min-height: 100vh;
+
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+
+        padding-top: 180px;
+        padding-bottom: 90px;
+    }
+
+    .home-content {
+        width: 440px;
+        max-width: calc(100vw - 30px);
+
+        text-align: center;
+    }
+
+    /* =========================================
+       QUESTION MARKS
+    ========================================= */
+
+    .question-mark {
+        display: flex;
+
+        justify-content: center;
+        align-items: center;
+
+        gap: 6px;
+
+        height: 86px;
+
+        margin-bottom: 28px;
+
+        color: #d5d4d8;
+
+        font-size: 72px;
+        font-weight: 900;
+
+        line-height: 1;
+    }
+
+    .question {
+        display: inline-block;
+
+        transform: translateY(0);
+
+        transition:
+            transform 0.2s ease,
+            opacity 0.2s ease;
+    }
+
+    .question:nth-child(1) {
+        animation: questionFloat 2.4s ease-in-out infinite;
+    }
+
+    .question:nth-child(2) {
+        animation: questionFloat 2.4s ease-in-out 0.15s infinite;
+    }
+
+    .question:nth-child(3) {
+        animation: questionFloat 2.4s ease-in-out 0.3s infinite;
+    }
+
+    .question:nth-child(4) {
+        animation: questionFloat 2.4s ease-in-out 0.45s infinite;
+    }
+
+    .question:nth-child(5) {
+        animation: questionFloat 2.4s ease-in-out 0.6s infinite;
+    }
+
+    .question:nth-child(6) {
+        animation: questionFloat 2.4s ease-in-out 0.75s infinite;
+    }
+
+    @keyframes questionFloat {
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-4px);
+        }
+    }
+
+    .subtitle {
+        color: #aaa7b3;
+
+        font-size: 20px;
+        font-weight: 400;
+
+        margin-bottom: 38px;
+    }
+
+    /* =========================================
+       GENERATE BUTTON
+    ========================================= */
+
+    .generate-btn {
+        width: 360px;
+        height: 84px;
+
+        max-width: 100%;
+
+        position: relative;
+
+        border: 2px solid transparent;
+        border-radius: 8px;
+
+        background:
+            linear-gradient(#09090c, #09090c) padding-box,
+            linear-gradient(
+                100deg,
+                #ff1795,
+                #b929ff,
+                #724cff
+            ) border-box;
+
+        color: white;
+
+        font-size: 35px;
+        font-weight: 900;
+
+        letter-spacing: 2px;
+
+        cursor: pointer;
+
+        transition:
+            transform 0.15s ease,
+            box-shadow 0.15s ease,
+            opacity 0.2s ease;
+    }
+
+    .generate-btn::before {
+        content: "";
+
+        position: absolute;
+
+        inset: -4px;
+
+        border-radius: 12px;
+
+        background:
+            linear-gradient(
+                90deg,
+                rgba(255, 20, 147, 0.35),
+                rgba(130, 50, 255, 0.35)
+            );
+
+        filter: blur(16px);
+
+        z-index: -1;
+
+        opacity: 0.8;
+    }
+
+    .generate-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+
+        box-shadow:
+            0 0 22px rgba(255, 20, 147, 0.28),
+            0 0 30px rgba(120, 60, 255, 0.22);
+    }
+
+    .generate-btn:active:not(:disabled) {
+        transform: translateY(1px) scale(0.99);
+    }
+
+    .generate-btn:disabled {
+        cursor: wait;
+        opacity: 0.75;
+    }
+
+    /* =========================================
+       RESULT SCREEN
+    ========================================= */
+
+    #resultScreen {
+        width: 100%;
+        min-height: 100vh;
+
+        display: none;
+
+        justify-content: center;
+        align-items: flex-start;
+
+        padding-top: 70px;
+        padding-bottom: 100px;
+    }
+
+    .result-content {
+        width: 560px;
+        max-width: calc(100vw - 30px);
+
+        margin: 0 auto;
+
+        text-align: center;
+    }
+
+    /* =========================================
+       ROLLING NUMBER
+    ========================================= */
+
+    .result-number {
+        width: 175px;
+        height: 76px;
+
+        margin: 0 auto 14px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border: 2px solid #59565f;
+        border-radius: 10px;
+
+        background: #201f24;
+
+        color: #9b98a5;
+
+        font-family: monospace;
+        font-size: 34px;
+        font-weight: 900;
+
+        box-shadow:
+            0 0 20px rgba(140, 138, 150, 0.14);
+
+        transition:
+            border-color 0.35s ease,
+            color 0.35s ease,
+            box-shadow 0.35s ease,
+            transform 0.15s ease;
+    }
+
+    .result-number.rolling {
+        border-color: #6a6772;
+
+        color: #9b98a5;
+
+        box-shadow:
+            0 0 15px rgba(150, 148, 160, 0.5),
+            0 0 35px rgba(150, 148, 160, 0.22);
+
+        transform: scale(1.035);
+    }
+
+    /*
+        Once the rarity is revealed, the box
+        recolors to match it via these classes
+        (added/removed in JS alongside rarityBox).
+    */
+
+    .result-number.result-trash {
+        border-color: var(--trash);
+        color: var(--trash);
+        box-shadow: 0 0 20px rgba(122, 119, 130, 0.25);
+    }
+
+    .result-number.result-common {
+        border-color: var(--common);
+        color: var(--common);
+        box-shadow: 0 0 20px rgba(201, 198, 209, 0.22);
+    }
+
+    .result-number.result-uncommon {
+        border-color: var(--uncommon);
+        color: var(--uncommon);
+        box-shadow: 0 0 20px rgba(0, 214, 160, 0.25);
+    }
+
+    .result-number.result-rare {
+        border-color: var(--rare);
+        color: var(--rare);
+        box-shadow: 0 0 20px rgba(68, 142, 255, 0.25);
+    }
+
+    .result-number.result-legendary {
+        border-color: var(--legendary);
+        color: var(--legendary);
+        box-shadow: 0 0 22px rgba(255, 176, 32, 0.3);
+    }
+
+    .result-number.result-mythical {
+        border-color: var(--mythical);
+        color: var(--mythical);
+        box-shadow: 0 0 26px rgba(239, 79, 224, 0.45);
+    }
+
+    .result-digits {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        gap: 0;
+    }
+
+    .result-digit {
+        display: inline-block;
+
+        width: 20px;
+
+        text-align: center;
+    }
+
+    .result-digit.locked {
+        animation: digitLock 0.25s ease-out;
+    }
+
+    @keyframes digitLock {
+        0% {
+            transform: translateY(-7px);
+            opacity: 0.2;
+        }
+
+        60% {
+            transform: translateY(2px);
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* =========================================
+       RESULT INFORMATION
+    ========================================= */
+
+    .rarity {
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        margin-bottom: 12px;
+
+        font-size: 13px;
+        font-weight: 900;
+
+        /*
+            Hidden until badges finish
+            revealing. JS adds
+            .rarity-show once the
+            badge animation completes.
+        */
+        opacity: 0;
+
+        transform: translateY(10px) scale(0.96);
+
+        transition:
+            opacity 0.5s ease,
+            transform 0.5s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .rarity.rarity-show {
+        opacity: 1;
+
+        transform: translateY(0) scale(1);
+    }
+
+    .rarity-label {
+        padding: 4px 11px;
+
+        border: 1px solid var(--rare);
+        border-radius: 3px;
+
+        color: var(--rare);
+    }
+
+    .rarity.rarity-trash .rarity-label       { border-color: var(--trash);     color: var(--trash); }
+    .rarity.rarity-common .rarity-label      { border-color: var(--common);    color: var(--common); }
+    .rarity.rarity-uncommon .rarity-label    { border-color: var(--uncommon);  color: var(--uncommon); }
+    .rarity.rarity-rare .rarity-label        { border-color: var(--rare);      color: var(--rare); }
+    .rarity.rarity-legendary .rarity-label   { border-color: var(--legendary); color: var(--legendary); }
+    .rarity.rarity-mythical .rarity-label    { border-color: var(--mythical);  color: var(--mythical); box-shadow: 0 0 14px rgba(239, 79, 224, 0.5); }
+
+    .top-percent {
+        color: #00d97e;
+    }
+
+    .rarity.rarity-trash .top-percent      { color: var(--trash); }
+    .rarity.rarity-common .top-percent     { color: var(--common); }
+    .rarity.rarity-uncommon .top-percent   { color: var(--uncommon); }
+    .rarity.rarity-rare .top-percent       { color: var(--rare); }
+    .rarity.rarity-legendary .top-percent  { color: var(--legendary); }
+    .rarity.rarity-mythical .top-percent   { color: var(--mythical); }
+
+    .result-xp {
+        display: inline-block;
+
+        margin-bottom: 10px;
+
+        padding: 5px 16px;
+
+        border: 1px solid #1557bd;
+        border-radius: 14px;
+
+        color: #4b91ff;
+
+        font-family: monospace;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .total-xp {
+        color: #d8d6dc;
+
+        font-family: monospace;
+        font-size: 16px;
+    }
+
+    .lifetime {
+        color: #8d8a95;
+
+        font-size: 12px;
+
+        margin-bottom: 6px;
+    }
+
+    /* =========================================
+       ACTIONS
+    ========================================= */
+
+    .result-actions {
+        margin-top: 16px;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        gap: 14px;
+    }
+
+    .reroll-btn {
+        padding: 8px 18px;
+
+        border: 1px solid #7a2f76;
+        border-radius: 6px;
+
+        background: #26242a;
+
+        color: #e48ae0;
+
+        font-size: 13px;
+        font-weight: 800;
+
+        cursor: pointer;
+
+        transition:
+            background 0.15s ease,
+            transform 0.15s ease;
+    }
+
+    .reroll-btn:hover {
+        background: #302e35;
+
+        transform: translateY(-1px);
+    }
+
+    .reroll-btn:disabled {
+        opacity: 0.6;
+        cursor: wait;
+    }
+
+    /* =========================================
+       BADGES
+    ========================================= */
+
+    .breakdown-title {
+        margin-top: 20px;
+
+        color: white;
+
+        font-size: 18px;
+        font-weight: 900;
+    }
+
+    .badge-count {
+        margin-top: 3px;
+
+        color: #8f8c97;
+
+        font-size: 11px;
+    }
+
+    .badges {
+        width: 100%;
+
+        margin-top: 14px;
+
+        display: flex;
+        flex-direction: column;
+
+        gap: 10px;
+
+        text-align: left;
+    }
+
+    .badge {
+        position: relative;
+
+        padding: 12px 16px 14px;
+
+        border: 1px solid #4c4952;
+        border-radius: 7px;
+
+        background: #232127;
+
+        /*
+            Start invisible.
+            JavaScript adds .badge-show one by one.
+        */
+        opacity: 0;
+
+        transform:
+            translateY(18px)
+            scale(0.97);
+
+        transition:
+            opacity 0.6s ease,
+            transform 0.6s cubic-bezier(.2,.8,.2,1);
+
+        overflow: hidden;
+    }
+
+    .badge::after {
+        content: "";
+
+        position: absolute;
+
+        top: 0;
+        left: -100%;
+
+        width: 50%;
+        height: 100%;
+
+        background:
+            linear-gradient(
+                90deg,
+                transparent,
+                rgba(255,255,255,0.045),
+                transparent
+            );
+
+        transform: skewX(-20deg);
+    }
+
+    .badge.badge-show {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+
+    .badge.badge-show::after {
+        animation: badgeShine 0.7s ease-out;
+    }
+
+    @keyframes badgeShine {
+        from {
+            left: -100%;
+        }
+
+        to {
+            left: 160%;
+        }
+    }
+
+    .badge:hover {
+        background: #29272e;
+
+        transform:
+            translateY(-1px)
+            scale(1.005);
+    }
+
+    .badge.trash        { border-color: #45424b; }
+    .badge.common        { border-color: #5c5964; }
+    .badge.uncommon      { border-color: #205b52; }
+    .badge.rare          { border-color: #38536d; }
+    .badge.legendary     { border-color: #7a5417; box-shadow: 0 0 16px rgba(255, 176, 32, 0.08); }
+    .badge.mythical      { border-color: #7c2a76; box-shadow: 0 0 20px rgba(239, 79, 224, 0.16); }
+
+    .badge-header {
+        display: flex;
+
+        align-items: center;
+
+        gap: 8px;
+    }
+
+    .badge-icon {
+        font-size: 16px;
+    }
+
+    .badge-name {
+        color: #eee;
+
+        font-size: 12px;
+        font-weight: 900;
+    }
+
+    .badge-rarity {
+        padding: 2px 8px;
+
+        border-radius: 4px;
+
+        font-size: 10px;
+        font-weight: 900;
+    }
+
+    .badge-rarity.trash {
+        color: var(--trash);
+
+        border: 1px solid #56535c;
+    }
+
+    .badge-rarity.common {
+        color: var(--common);
+
+        border: 1px solid #66636c;
+    }
+
+    .badge-rarity.uncommon {
+        color: var(--uncommon);
+
+        background: rgba(0, 220, 160, 0.08);
+
+        border: 1px solid #007d61;
+    }
+
+    .badge-rarity.rare {
+        color: var(--rare);
+
+        background: rgba(30, 100, 255, 0.08);
+
+        border: 1px solid #225ab1;
+    }
+
+    .badge-rarity.legendary {
+        color: var(--legendary);
+
+        background: rgba(255, 176, 32, 0.1);
+
+        border: 1px solid #a06c00;
+    }
+
+    .badge-rarity.mythical {
+        color: var(--mythical);
+
+        background: rgba(239, 79, 224, 0.12);
+
+        border: 1px solid #a72d9c;
+    }
+
+    .badge-xp {
+        position: absolute;
+
+        right: 10px;
+        top: 10px;
+
+        padding: 2px 9px;
+
+        border: 1px solid #824d00;
+        border-radius: 9px;
+
+        color: #ffa900;
+
+        font-family: monospace;
+
+        font-size: 11px;
+        font-weight: 900;
+    }
+
+    .badge-description {
+        margin-top: 6px;
+
+        color: #8f8b96;
+
+        font-size: 11px;
+
+        line-height: 1.35;
+    }
+
+    .digits {
+        display: flex;
+
+        gap: 4px;
+
+        margin-top: 9px;
+    }
+
+    .digit {
+        width: 18px;
+        height: 20px;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        border: 1px solid #55525a;
+        border-radius: 3px;
+
+        background: #34323a;
+
+        color: #aaa7b0;
+
+        font-family: monospace;
+
+        font-size: 9px;
+        font-weight: 900;
+    }
+
+    .digit.highlight {
+        background: #73d8ff;
+
+        border-color: #278ad0;
+
+        color: #07121b;
+    }
+
+    /* =========================================
+       LIGHT MODE
+    ========================================= */
+
+    body.light {
+        --bg: #f4f4f6;
+        --panel: #ffffff;
+        --panel-hover: #f6f6f8;
+        --border: #cccbd1;
+        --text: #202025;
+        --muted: #66646c;
+    }
+
+    body.light .navbar,
+    body.light .logo {
+        color: #222;
+    }
+
+    body.light .subtitle {
+        color: #65636b;
+    }
+
+    body.light .generate-btn {
+        background:
+            linear-gradient(#fff, #fff) padding-box,
+            linear-gradient(
+                100deg,
+                #ff1795,
+                #8b35ff
+            ) border-box;
+
+        color: #15151a;
+    }
+
+    body.light .question-mark {
+        color: #333;
+    }
+
+    body.light .badge {
+        background: #f8f8fa;
+
+        color: #222;
+    }
+
+    /* =========================================
+       MOBILE
+    ========================================= */
+
+    @media (max-width: 600px) {
+
+        .navbar {
+            padding: 0 10px;
+        }
+
+        #homeScreen {
+            padding-top: 130px;
+        }
+
+        .question-mark {
+            gap: 4px;
+
+            font-size: 56px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+        }
+
+        .generate-btn {
+            width: 300px;
+            height: 68px;
+
+            font-size: 27px;
+        }
+
+        #resultScreen {
+            padding-top: 60px;
+        }
+
+        .result-actions {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<!-- =========================================
+     NAVBAR
+========================================= -->
+
+<header class="navbar">
+
+    <div class="nav-left">
+
+        <div class="logo">
+            RNGdom
+        </div>
+
+        <div class="nav-icon">
+            ?
+        </div>
+
+        <div class="nav-icon">
+            🎮
+        </div>
+
+    </div>
+
+
+    <div class="nav-right">
+
+        <div class="theme-switcher">
+
+            <button
+                class="theme-btn"
+                id="sunBtn"
+                title="Light"
+            >
+                ☀
+            </button>
+
+            <button
+                class="theme-btn active"
+                id="systemBtn"
+                title="System"
+            >
+                ◐
+            </button>
+
+            <button
+                class="theme-btn"
+                id="moonBtn"
+                title="Dark"
+            >
+                ☾
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- =========================================
+     HOME SCREEN
+========================================= -->
+
+<main id="homeScreen">
+
+    <div class="home-content">
+
+        <div class="question-mark">
+
+            <span class="question">?</span>
+            <span class="question">?</span>
+            <span class="question">?</span>
+            <span class="question">?</span>
+            <span class="question">?</span>
+            <span class="question">?</span>
+
+        </div>
+
+
+        <p class="subtitle">
+            Roll as many times as you want. See how lucky you get.
+        </p>
+
+
+        <button
+            class="generate-btn"
+            id="generateButton"
+        >
+            GENERATE
+        </button>
+
+    </div>
+
+</main>
+
+
+<!-- =========================================
+     RESULT SCREEN
+========================================= -->
+
+<section id="resultScreen">
+
+    <div class="result-content">
+
+        <!-- NUMBER -->
+
+        <div
+            class="result-number"
+            id="resultNumber"
+        >
+            <div
+                class="result-digits"
+                id="resultDigits"
+            >
+                <span class="result-digit">0</span>
+                <span class="result-digit">0</span>
+                <span class="result-digit">0</span>
+                <span class="result-digit">0</span>
+                <span class="result-digit">0</span>
+                <span class="result-digit">0</span>
+            </div>
+        </div>
+
+
+        <!-- RARITY -->
+
+        <div class="rarity" id="rarityBox">
+
+            <span class="rarity-label" id="rarityLabel">
+                COMMON
+            </span>
+
+            <span>
+                •
+            </span>
+
+            <span class="top-percent" id="topPercent">
+                TOP 50%
+            </span>
+
+        </div>
+
+
+        <!-- XP -->
+
+        <div>
+            <span
+                class="result-xp"
+                id="rollXP"
+            >
+                0 EP
+            </span>
+        </div>
+
+
+        <div class="total-xp" id="totalXP">
+            0 EP
+        </div>
+
+
+        <div class="lifetime">
+            YOUR LIFETIME EP
+        </div>
+
+
+        <!-- ACTIONS -->
+
+        <div class="result-actions">
+
+            <button
+                class="reroll-btn"
+                id="rerollButton"
+            >
+                ↻ REROLL
+            </button>
+
+        </div>
+
+
+        <!-- BADGES -->
+
+        <h2 class="breakdown-title">
+            BADGE BREAKDOWN
+        </h2>
+
+
+        <div class="badge-count" id="badgeCount">
+            0 BADGES EARNED
+        </div>
+
+
+        <div class="badges" id="badges"></div>
+
+    </div>
+
+</section>
+
+
+<script>
+/* =====================================================
+   ELEMENTS
+===================================================== */
+
+const homeScreen =
+    document.getElementById("homeScreen");
+
+const resultScreen =
+    document.getElementById("resultScreen");
+
+const generateButton =
+    document.getElementById("generateButton");
+
+const rerollButton =
+    document.getElementById("rerollButton");
+
+const resultNumber =
+    document.getElementById("resultNumber");
+
+const resultDigits =
+    document.getElementById("resultDigits");
+
+const rollXP =
+    document.getElementById("rollXP");
+
+const totalXPEl =
+    document.getElementById("totalXP");
+
+const badgesContainer =
+    document.getElementById("badges");
+
+const badgeCountEl =
+    document.getElementById("badgeCount");
+
+const rarityBox =
+    document.getElementById("rarityBox");
+
+const rarityLabelEl =
+    document.getElementById("rarityLabel");
+
+const topPercentEl =
+    document.getElementById("topPercent");
+
+
+/* =====================================================
+   RARITY SYSTEM
+===================================================== */
+
+const RARITY_ORDER =
+    ["trash", "common", "uncommon", "rare", "legendary", "mythical"];
+
+const RARITY_XP = {
+    trash: 30,
+    common: 140,
+    uncommon: 360,
+    rare: 900,
+    legendary: 2400,
+    mythical: 7000
+};
+
+const RARITY_TOP_RANGE = {
+    trash:      [80, 99],
+    common:     [50, 80],
+    uncommon:   [22, 50],
+    rare:       [7, 22],
+    legendary:  [1, 7],
+    mythical:   [0.1, 1]
+};
+
+/*
+    Overall rarity is based on how much total EP
+    the roll earned — not your single best badge,
+    and not a separate badge-weight score. Just:
+    the more you racked up together, the rarer the
+    overall result.
+
+    Pushed much harder now — 6,000 EP lands you at
+    "uncommon", not much higher. Reaching rare+ means
+    stacking multiple rare/legendary-tier badges in a
+    single roll, and mythical (outside the 1-2 digit
+    glitch override) should be a genuine jackpot.
+*/
+
+const RARITY_EP_THRESHOLDS = {
+    trash: 0,
+    common: 1500,
+    uncommon: 6000,
+    rare: 20000,
+    legendary: 60000,
+    mythical: 150000
+};
+
+function rarityFromXP(totalXP) {
+
+    let tier = "trash";
+
+    RARITY_ORDER.forEach(r => {
+
+        if (totalXP >= RARITY_EP_THRESHOLDS[r]) {
+            tier = r;
+        }
+
+    });
+
+    return tier;
+
+}
+
+let lifetimeEP = 0;
+
+
+/* =====================================================
+   NUMBER HELPERS
+===================================================== */
+
+function isPrime(n) {
+
+    if (n < 2) return false;
+
+    for (let i = 2; i * i <= n; i++) {
+
+        if (n % i === 0) return false;
+
+    }
+
+    return true;
+
+}
+
+function isPerfectSquare(n) {
+
+    const r = Math.round(Math.sqrt(n));
+
+    return r * r === n;
+
+}
+
+function isPerfectCube(n) {
+
+    const r = Math.round(Math.cbrt(n));
+
+    return r * r * r === n;
+
+}
+
+function isTriangular(n) {
+
+    const k = Math.round((-1 + Math.sqrt(1 + 8 * n)) / 2);
+
+    return k * (k + 1) / 2 === n;
+
+}
+
+const FIB_SET =
+    new Set([121393, 196418, 317811, 514229, 832040]);
+
+function digitCounts(digits) {
+
+    const counts = {};
+
+    digits.forEach(d => {
+
+        counts[d] = (counts[d] || 0) + 1;
+
+    });
+
+    return counts;
+
+}
+
+function uniqueCount(digits) {
+
+    return new Set(digits).size;
+
+}
+
+
+/* =====================================================
+   NUMBER GENERATION
+
+   Normally always a 6-digit roll. VERY VERY RARELY
+   (about a 1.5% chance) the roll "glitches" and comes
+   out shorter — and within that already-rare pool,
+   shorter lengths are weighted to be rarer still, so
+   landing on 1-2 digits is extremely unlikely overall.
+===================================================== */
+
+const GLITCH_CHANCE = 0.015;
+
+const GLITCH_LENGTH_WEIGHTS = [
+    { length: 5, weight: 45 },
+    { length: 4, weight: 28 },
+    { length: 3, weight: 16 },
+    { length: 2, weight: 8 },
+    { length: 1, weight: 3 }
+];
+
+function pickGlitchLength() {
+
+    const totalWeight =
+        GLITCH_LENGTH_WEIGHTS.reduce((sum, w) => sum + w.weight, 0);
+
+    let roll = Math.random() * totalWeight;
+
+    for (const entry of GLITCH_LENGTH_WEIGHTS) {
+
+        if (roll < entry.weight) return entry.length;
+
+        roll -= entry.weight;
+
+    }
+
+    return GLITCH_LENGTH_WEIGHTS[0].length;
+
+}
+
+function rollNumber() {
+
+    if (Math.random() < GLITCH_CHANCE) {
+
+        const length = pickGlitchLength();
+
+        const min = length === 1 ? 0 : Math.pow(10, length - 1);
+        const max = Math.pow(10, length) - 1;
+
+        return Math.floor(min + Math.random() * (max - min + 1));
+
+    }
+
+    return Math.floor(100000 + Math.random() * 900000);
+
+}
+
+
+/* =====================================================
+   BADGE LIBRARY
+   ~155 badge definitions across 6 rarity tiers.
+   Each badge has: id, name, icon, rarity, xp,
+   description, test(digits, str, number), and an
+   optional highlight(digits) returning true/false
+   per digit position for the digit row.
+===================================================== */
+
+const badges = [];
+
+const DIGIT_ICONS =
+    ["0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣"];
+
+/* --- contains a digit (x10) --- */
+for (let d = 0; d <= 9; d++) {
+    badges.push({
+        id: `contains-${d}`,
+        name: `GOT A ${d}`,
+        icon: DIGIT_ICONS[d],
+        rarity: "trash",
+        xp: RARITY_XP.trash,
+        description: `CONTAINS AT LEAST ONE ${d}.`,
+        test: (digits) => digits.includes(d),
+        highlight: (digits) => digits.map(x => x === d)
+    });
+}
+
+/* --- opens with a digit (x10) --- */
+for (let d = 0; d <= 9; d++) {
+    badges.push({
+        id: `starts-${d}`,
+        name: `OPENS WITH ${d}`,
+        icon: "🚪",
+        rarity: "common",
+        xp: RARITY_XP.common,
+        description: `THE FIRST DIGIT IS ${d}.`,
+        test: (digits) => digits[0] === d,
+        highlight: (digits) => digits.map((x, i) => i === 0)
+    });
+}
+
+/* --- closes with a digit (x10) --- */
+for (let d = 0; d <= 9; d++) {
+    badges.push({
+        id: `ends-${d}`,
+        name: `CLOSES WITH ${d}`,
+        icon: "🏁",
+        rarity: "common",
+        xp: RARITY_XP.common,
+        description: `THE LAST DIGIT IS ${d}.`,
+        test: (digits) => digits[5] === d,
+        highlight: (digits) => digits.map((x, i) => i === 5)
+    });
+}
+
+/* --- exactly two of a digit (x10) --- */
+for (let d = 0; d <= 9; d++) {
+    badges.push({
+        id: `pair-${d}`,
+        name: `DOUBLE ${d}S`,
+        icon: "👯",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: `CONTAINS EXACTLY TWO ${d}S.`,
+        test: (digits) => digits.filter(x => x === d).length === 2,
+        highlight: (digits) => digits.map(x => x === d)
+    });
+}
+
+/* --- exactly three of a digit (x10) --- */
+for (let d = 0; d <= 9; d++) {
+    badges.push({
+        id: `triple-${d}`,
+        name: `TRIPLE ${d}S`,
+        icon: "🎰",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: `CONTAINS EXACTLY THREE ${d}S.`,
+        test: (digits) => digits.filter(x => x === d).length === 3,
+        highlight: (digits) => digits.map(x => x === d)
+    });
+}
+
+/* --- exactly four of a digit (x10) --- */
+for (let d = 0; d <= 9; d++) {
+    badges.push({
+        id: `quad-${d}`,
+        name: `QUAD ${d}S`,
+        icon: "💠",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: `CONTAINS EXACTLY FOUR ${d}S.`,
+        test: (digits) => digits.filter(x => x === d).length === 4,
+        highlight: (digits) => digits.map(x => x === d)
+    });
+}
+
+/* --- divisibility (x12) --- */
+[
+    [2, "trash"], [3, "trash"],
+    [4, "common"], [5, "common"], [6, "common"],
+    [7, "uncommon"], [8, "uncommon"], [9, "uncommon"],
+    [11, "rare"], [12, "rare"], [13, "rare"],
+    [25, "legendary"]
+].forEach(([div, rarity]) => {
+    badges.push({
+        id: `div-${div}`,
+        name: `MULTIPLE OF ${div}`,
+        icon: "➗",
+        rarity,
+        xp: RARITY_XP[rarity],
+        description: `DIVISIBLE BY ${div} WITH NO REMAINDER.`,
+        test: (digits, str, number) => number % div === 0
+    });
+});
+
+/* --- hand-authored badges --- */
+
+badges.push(
+
+    {
+        id: "palindrome",
+        name: "PALINDROME",
+        icon: "💧",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "READS THE SAME BACKWARDS AS FORWARDS.",
+        test: (digits) => digits.join("") === [...digits].reverse().join(""),
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "ascending",
+        name: "STAIRCASE UP",
+        icon: "📈",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "EACH DIGIT IS GREATER THAN THE ONE BEFORE IT.",
+        test: (digits) => digits.every((d, i) => i === 0 || d > digits[i - 1])
+    },
+    {
+        id: "descending",
+        name: "STAIRCASE DOWN",
+        icon: "📉",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "EACH DIGIT IS LESS THAN THE ONE BEFORE IT.",
+        test: (digits) => digits.every((d, i) => i === 0 || d < digits[i - 1])
+    },
+    {
+        id: "twin-halves",
+        name: "TWIN HALVES",
+        icon: "🪞",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "THE FIRST THREE DIGITS MATCH THE LAST THREE.",
+        test: (digits) => digits.slice(0, 3).join("") === digits.slice(3).join(""),
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "all-even",
+        name: "ALL EVEN",
+        icon: "🔵",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "EVERY DIGIT IS EVEN.",
+        test: (digits) => digits.every(d => d % 2 === 0)
+    },
+    {
+        id: "all-odd",
+        name: "ALL ODD",
+        icon: "🟠",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "EVERY DIGIT IS ODD.",
+        test: (digits) => digits.every(d => d % 2 === 1)
+    },
+    {
+        id: "alternating-parity",
+        name: "ZIGZAG",
+        icon: "⚡",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "DIGITS ALTERNATE BETWEEN EVEN AND ODD.",
+        test: (digits) => digits.every((d, i) => i === 0 || (d % 2) !== (digits[i - 1] % 2))
+    },
+    {
+        id: "prime",
+        name: "PRIME NUMBER",
+        icon: "💎",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "DIVISIBLE ONLY BY 1 AND ITSELF.",
+        test: (digits, str, number) => isPrime(number)
+    },
+    {
+        id: "perfect-square",
+        name: "PERFECT SQUARE",
+        icon: "🟦",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "IS SOME WHOLE NUMBER MULTIPLIED BY ITSELF.",
+        test: (digits, str, number) => isPerfectSquare(number)
+    },
+    {
+        id: "perfect-cube",
+        name: "PERFECT CUBE",
+        icon: "🧊",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "IS SOME WHOLE NUMBER RAISED TO THE POWER OF 3.",
+        test: (digits, str, number) => isPerfectCube(number)
+    },
+    {
+        id: "fibonacci",
+        name: "FIBONACCI NUMBER",
+        icon: "🧠",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "APPEARS IN THE FIBONACCI SEQUENCE.",
+        test: (digits, str, number) => FIB_SET.has(number)
+    },
+    {
+        id: "triangular",
+        name: "TRIANGULAR NUMBER",
+        icon: "🔺",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "CAN BE ARRANGED INTO AN EQUILATERAL TRIANGLE OF DOTS.",
+        test: (digits, str, number) => isTriangular(number)
+    },
+    {
+        id: "sextuple",
+        name: "SEXTUPLE",
+        icon: "👑",
+        rarity: "mythical",
+        xp: RARITY_XP.mythical,
+        description: "ALL SIX DIGITS ARE IDENTICAL.",
+        test: (digits) => digits.every(d => d === digits[0]),
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "quintuple",
+        name: "QUINTUPLE",
+        icon: "🌟",
+        rarity: "mythical",
+        xp: RARITY_XP.mythical,
+        description: "ONE DIGIT APPEARS FIVE TIMES.",
+        test: (digits) => Object.values(digitCounts(digits)).includes(5)
+    },
+    {
+        id: "full-house",
+        name: "FULL HOUSE",
+        icon: "🃏",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "ONE DIGIT APPEARS THREE TIMES AND ANOTHER APPEARS TWICE.",
+        test: (digits) => {
+            const counts = Object.values(digitCounts(digits));
+            return counts.includes(3) && counts.includes(2);
+        }
+    },
+    {
+        id: "two-pair",
+        name: "TWO PAIR",
+        icon: "👥",
+        rarity: "common",
+        xp: RARITY_XP.common,
+        description: "CONTAINS TWO DISTINCT PAIRS OF MATCHING DIGITS.",
+        test: (digits) => Object.values(digitCounts(digits)).filter(c => c === 2).length === 2
+    },
+    {
+        id: "mini-scramble",
+        name: "MINI SCRAMBLE",
+        icon: "🍀",
+        rarity: "common",
+        xp: RARITY_XP.common,
+        description: "CONTAINS 3+ ADJACENT DIGITS THAT FORM A RUN WHEN SORTED.",
+        test: (digits) => {
+            for (let i = 0; i <= digits.length - 3; i++) {
+                const chunk = [...digits.slice(i, i + 3)].sort((a, b) => a - b);
+                if (chunk[1] === chunk[0] + 1 && chunk[2] === chunk[1] + 1) return true;
+            }
+            return false;
+        }
+    },
+    {
+        id: "contiguous-pair",
+        name: "CONTIGUOUS PAIR",
+        icon: "◀",
+        rarity: "trash",
+        xp: RARITY_XP.trash,
+        description: "TWO ADJACENT DIGITS MATCH.",
+        test: (digits) => digits.some((d, i) => i > 0 && d === digits[i - 1])
+    },
+    {
+        id: "lone-pair",
+        name: "PAIR",
+        icon: "◀",
+        rarity: "trash",
+        xp: RARITY_XP.trash,
+        description: "AT LEAST TWO DIGITS MATCH, ANYWHERE IN THE NUMBER.",
+        test: (digits) => uniqueCount(digits) < digits.length
+    },
+    {
+        id: "paired-bookends",
+        name: "PAIRED BOOKENDS",
+        icon: "🏆",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "STARTS WITH A PAIR AND ENDS WITH A DIFFERENT PAIR.",
+        test: (digits) => digits[0] === digits[1] && digits[4] === digits[5] && digits[0] !== digits[4],
+        highlight: (digits) => digits.map((d, i) => i <= 1 || i >= 4)
+    },
+    {
+        id: "mesa",
+        name: "MESA",
+        icon: "◒",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "DIGITS RISE TO A PEAK, THEN FALL (FLAT STRETCHES ALLOWED).",
+        test: (digits) => {
+            let i = 0;
+            while (i < digits.length - 1 && digits[i + 1] >= digits[i]) i++;
+            while (i < digits.length - 1 && digits[i + 1] <= digits[i]) i++;
+            return i === digits.length - 1;
+        }
+    },
+    {
+        id: "valley",
+        name: "VALLEY",
+        icon: "⛰️",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "DIGITS FALL TO A LOW POINT, THEN RISE (FLAT STRETCHES ALLOWED).",
+        test: (digits) => {
+            let i = 0;
+            while (i < digits.length - 1 && digits[i + 1] <= digits[i]) i++;
+            while (i < digits.length - 1 && digits[i + 1] >= digits[i]) i++;
+            return i === digits.length - 1;
+        }
+    },
+    {
+        id: "gap-one",
+        name: "GAP ONE",
+        icon: "ℹ️",
+        rarity: "common",
+        xp: RARITY_XP.common,
+        description: "THE FIRST AND LAST DIGITS DIFFER BY EXACTLY 1.",
+        test: (digits) => Math.abs(digits[0] - digits[5]) === 1
+    },
+    {
+        id: "bookended",
+        name: "BOOKENDED",
+        icon: "📕",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "THE FIRST AND LAST DIGIT ARE THE SAME.",
+        test: (digits) => digits[0] === digits[5],
+        highlight: (digits) => digits.map((d, i) => i === 0 || i === 5)
+    },
+    {
+        id: "quartet-unique",
+        name: "QUARTET",
+        icon: "⚔️",
+        rarity: "trash",
+        xp: RARITY_XP.trash,
+        description: "USES EXACTLY FOUR DIFFERENT DIGITS.",
+        test: (digits) => uniqueCount(digits) === 4
+    },
+    {
+        id: "quintet-unique",
+        name: "QUINTET",
+        icon: "🗡️",
+        rarity: "trash",
+        xp: RARITY_XP.trash,
+        description: "USES EXACTLY FIVE DIFFERENT DIGITS.",
+        test: (digits) => uniqueCount(digits) === 5
+    },
+    {
+        id: "all-unique",
+        name: "ALL UNIQUE",
+        icon: "🦄",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "ALL SIX DIGITS ARE DIFFERENT.",
+        test: (digits) => uniqueCount(digits) === 6
+    },
+    {
+        id: "sum-prime",
+        name: "PRIME SUM",
+        icon: "➕",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "THE DIGITS ADD UP TO A PRIME NUMBER.",
+        test: (digits) => isPrime(digits.reduce((a, b) => a + b, 0))
+    },
+    {
+        id: "sum-square",
+        name: "SQUARE SUM",
+        icon: "🔷",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "THE DIGITS ADD UP TO A PERFECT SQUARE.",
+        test: (digits) => isPerfectSquare(digits.reduce((a, b) => a + b, 0))
+    },
+    {
+        id: "answer-to-everything",
+        name: "ANSWER TO EVERYTHING",
+        icon: "🐋",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "THE DIGITS ADD UP TO EXACTLY 42.",
+        test: (digits) => digits.reduce((a, b) => a + b, 0) === 42
+    },
+    {
+        id: "featherweight",
+        name: "FEATHERWEIGHT",
+        icon: "🪶",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "THE DIGITS ADD UP TO 10 OR LESS.",
+        test: (digits) => digits.reduce((a, b) => a + b, 0) <= 10
+    },
+    {
+        id: "heavyweight",
+        name: "HEAVYWEIGHT",
+        icon: "🏋️",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "THE DIGITS ADD UP TO 45 OR MORE.",
+        test: (digits) => digits.reduce((a, b) => a + b, 0) >= 45
+    },
+    {
+        id: "max-roll",
+        name: "MAXIMUM ROLL",
+        icon: "🌌",
+        rarity: "mythical",
+        xp: RARITY_XP.mythical,
+        description: "THE HIGHEST POSSIBLE ROLL: 999999.",
+        test: (digits, str, number) => number === 999999,
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "min-roll",
+        name: "MINIMUM ROLL",
+        icon: "🕳️",
+        rarity: "mythical",
+        xp: RARITY_XP.mythical,
+        description: "THE LOWEST POSSIBLE ROLL: 100000.",
+        test: (digits, str, number) => number === 100000,
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "jackpot-sequence",
+        name: "JACKPOT SEQUENCE",
+        icon: "🎉",
+        rarity: "mythical",
+        xp: RARITY_XP.mythical,
+        description: "ROLLED EXACTLY 123456 OR 654321.",
+        test: (digits, str, number) => number === 123456 || number === 654321,
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "devils-number",
+        name: "DEVIL'S NUMBER",
+        icon: "😈",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "CONTAINS 666 SOMEWHERE IN THE NUMBER.",
+        test: (digits, str) => str.includes("666")
+    },
+    {
+        id: "angel-number",
+        name: "ANGEL NUMBER",
+        icon: "😇",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "CONTAINS 777 SOMEWHERE IN THE NUMBER.",
+        test: (digits, str) => str.includes("777")
+    },
+    {
+        id: "nice",
+        name: "NICE",
+        icon: "😏",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "CONTAINS 69 SOMEWHERE IN THE NUMBER.",
+        test: (digits, str) => str.includes("69")
+    },
+    {
+        id: "blaze-it",
+        name: "BLAZE IT",
+        icon: "🍃",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "CONTAINS 420 SOMEWHERE IN THE NUMBER.",
+        test: (digits, str) => str.includes("420")
+    },
+    {
+        id: "emergency",
+        name: "EMERGENCY",
+        icon: "🚨",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "CONTAINS 911 SOMEWHERE IN THE NUMBER.",
+        test: (digits, str) => str.includes("911")
+    },
+    {
+        id: "round-number",
+        name: "ROUND NUMBER",
+        icon: "⭕",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "ENDS IN THREE ZEROES.",
+        test: (digits, str) => str.endsWith("000")
+    },
+    {
+        id: "century",
+        name: "CENTURY",
+        icon: "💯",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "ENDS IN TWO ZEROES.",
+        test: (digits, str) => str.endsWith("00")
+    },
+    {
+        id: "odd-one-out",
+        name: "ODD ONE OUT",
+        icon: "🎯",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "EXACTLY ONE DIGIT HAS A DIFFERENT PARITY FROM ALL THE OTHERS.",
+        test: (digits) => {
+            const evens = digits.filter(d => d % 2 === 0).length;
+            return evens === 1 || evens === 5;
+        }
+    },
+    {
+        id: "snake-eyes",
+        name: "SNAKE EYES",
+        icon: "🐍",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "CONTAINS 11 SOMEWHERE IN THE NUMBER.",
+        test: (digits, str) => str.includes("11")
+    },
+    {
+        id: "high-roller",
+        name: "HIGH ROLLER",
+        icon: "😎",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "EVERY DIGIT IS 5 OR HIGHER.",
+        test: (digits) => digits.every(d => d >= 5)
+    },
+    {
+        id: "low-roller",
+        name: "LOW ROLLER",
+        icon: "🥱",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "EVERY DIGIT IS 4 OR LOWER.",
+        test: (digits) => digits.every(d => d <= 4)
+    },
+    {
+        id: "boring",
+        name: "NOTHING SPECIAL",
+        icon: "😐",
+        rarity: "trash",
+        xp: RARITY_XP.trash,
+        description: "NO OTHER PATTERN WAS FOUND IN THIS ROLL.",
+        test: () => false // handled manually below
+    },
+
+    /* --- big batch of extra badges --- */
+
+    {
+        id: "starts-even",
+        name: "EVEN START",
+        icon: "🔷",
+        rarity: "trash",
+        xp: RARITY_XP.trash,
+        description: "THE FIRST DIGIT IS EVEN.",
+        test: (digits) => digits[0] % 2 === 0
+    },
+    {
+        id: "starts-odd",
+        name: "ODD START",
+        icon: "🔶",
+        rarity: "trash",
+        xp: RARITY_XP.trash,
+        description: "THE FIRST DIGIT IS ODD.",
+        test: (digits) => digits[0] % 2 === 1
+    },
+    {
+        id: "sum-even",
+        name: "EVEN SUM",
+        icon: "🧮",
+        rarity: "trash",
+        xp: RARITY_XP.trash,
+        description: "THE DIGITS ADD UP TO AN EVEN NUMBER.",
+        test: (digits) => digits.reduce((a, b) => a + b, 0) % 2 === 0
+    },
+    {
+        id: "sum-odd",
+        name: "ODD SUM",
+        icon: "🔢",
+        rarity: "trash",
+        xp: RARITY_XP.trash,
+        description: "THE DIGITS ADD UP TO AN ODD NUMBER.",
+        test: (digits) => digits.reduce((a, b) => a + b, 0) % 2 === 1
+    },
+    {
+        id: "step-up",
+        name: "SINGLE STEP UP",
+        icon: "🪜",
+        rarity: "common",
+        xp: RARITY_XP.common,
+        description: "TWO ADJACENT DIGITS COUNT UP BY EXACTLY 1.",
+        test: (digits) => {
+            for (let i = 0; i < digits.length - 1; i++) {
+                if (digits[i + 1] - digits[i] === 1) return true;
+            }
+            return false;
+        }
+    },
+    {
+        id: "step-down",
+        name: "SINGLE STEP DOWN",
+        icon: "🪜",
+        rarity: "common",
+        xp: RARITY_XP.common,
+        description: "TWO ADJACENT DIGITS COUNT DOWN BY EXACTLY 1.",
+        test: (digits) => {
+            for (let i = 0; i < digits.length - 1; i++) {
+                if (digits[i] - digits[i + 1] === 1) return true;
+            }
+            return false;
+        }
+    },
+    {
+        id: "sum-div-5",
+        name: "FIVER",
+        icon: "5️⃣",
+        rarity: "common",
+        xp: RARITY_XP.common,
+        description: "THE DIGITS ADD UP TO A MULTIPLE OF 5.",
+        test: (digits) => digits.reduce((a, b) => a + b, 0) % 5 === 0
+    },
+    {
+        id: "no-zeros",
+        name: "ZERO FREE",
+        icon: "❌",
+        rarity: "common",
+        xp: RARITY_XP.common,
+        description: "CONTAINS NO ZEROES AT ALL.",
+        test: (digits) => !digits.includes(0)
+    },
+    {
+        id: "center-match",
+        name: "CENTER MATCH",
+        icon: "🎯",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "THE TWO MIDDLE DIGITS ARE THE SAME.",
+        test: (digits) => digits.length === 6 && digits[2] === digits[3],
+        highlight: (digits) => digits.map((d, i) => i === 2 || i === 3)
+    },
+    {
+        id: "ascend-trio",
+        name: "MINI CLIMB",
+        icon: "⛏️",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "THREE ADJACENT DIGITS COUNT UP BY EXACTLY 1 EACH.",
+        test: (digits) => {
+            for (let i = 0; i <= digits.length - 3; i++) {
+                if (digits[i + 1] - digits[i] === 1 && digits[i + 2] - digits[i + 1] === 1) return true;
+            }
+            return false;
+        }
+    },
+    {
+        id: "descend-trio",
+        name: "MINI DROP",
+        icon: "🪂",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "THREE ADJACENT DIGITS COUNT DOWN BY EXACTLY 1 EACH.",
+        test: (digits) => {
+            for (let i = 0; i <= digits.length - 3; i++) {
+                if (digits[i] - digits[i + 1] === 1 && digits[i + 1] - digits[i + 2] === 1) return true;
+            }
+            return false;
+        }
+    },
+    {
+        id: "full-spread",
+        name: "FULL SPREAD",
+        icon: "↔️",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "THE HIGHEST AND LOWEST DIGIT ARE 8 OR MORE APART.",
+        test: (digits) => Math.max(...digits) - Math.min(...digits) >= 8
+    },
+    {
+        id: "aba-pattern",
+        name: "ABABAB",
+        icon: "🔁",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "DIGITS ALTERNATE BETWEEN TWO VALUES THE WHOLE WAY THROUGH.",
+        test: (digits) =>
+            digits[0] === digits[2] &&
+            digits[2] === digits[4] &&
+            digits[1] === digits[3] &&
+            digits[3] === digits[5] &&
+            digits[0] !== digits[1],
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "split-six",
+        name: "SPLIT SIX",
+        icon: "✂️",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "TWO DIFFERENT DIGITS EACH APPEAR EXACTLY THREE TIMES.",
+        test: (digits) => Object.values(digitCounts(digits)).filter(c => c === 3).length === 2
+    },
+    {
+        id: "emirp",
+        name: "MIRROR PRIME",
+        icon: "🪟",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "THE NUMBER AND ITS REVERSE ARE BOTH PRIME.",
+        test: (digits, str, number) => {
+            const reversed = Number([...str].reverse().join(""));
+            return str !== [...str].reverse().join("") && isPrime(number) && isPrime(reversed);
+        }
+    },
+    {
+        id: "palindrome-prime",
+        name: "PALINDROMIC PRIME",
+        icon: "🔮",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "THE NUMBER IS BOTH A PALINDROME AND A PRIME.",
+        test: (digits, str, number) =>
+            str === [...str].reverse().join("") && isPrime(number),
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "square-and-triangular",
+        name: "DOUBLE SHAPE",
+        icon: "🧩",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "THE NUMBER IS BOTH A PERFECT SQUARE AND A TRIANGULAR NUMBER.",
+        test: (digits, str, number) => isPerfectSquare(number) && isTriangular(number)
+    },
+    {
+        id: "perfectly-balanced",
+        name: "PERFECTLY BALANCED",
+        icon: "⚖️",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "THE DIGITS ADD UP TO EXACTLY 27 — DEAD CENTER OF THE POSSIBLE RANGE.",
+        test: (digits) => digits.reduce((a, b) => a + b, 0) === 27
+    },
+    {
+        id: "grand-round",
+        name: "GRAND ROUND",
+        icon: "🎡",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "ENDS IN FOUR ZEROES.",
+        test: (digits, str) => str.endsWith("0000")
+    },
+    {
+        id: "cosmic-jackpot",
+        name: "COSMIC JACKPOT",
+        icon: "🌠",
+        rarity: "mythical",
+        xp: RARITY_XP.mythical,
+        description: "A PALINDROME, PRIME ITSELF, AND ITS DIGITS ADD UP TO A PRIME TOO.",
+        test: (digits, str, number) =>
+            str === [...str].reverse().join("") &&
+            isPrime(number) &&
+            isPrime(digits.reduce((a, b) => a + b, 0)),
+        highlight: (digits) => digits.map(() => true)
+    },
+
+    /* --- second batch of extra badges --- */
+
+    {
+        id: "low-sum",
+        name: "UNDER TWENTY",
+        icon: "🪶",
+        rarity: "trash",
+        xp: RARITY_XP.trash,
+        description: "THE DIGITS ADD UP TO LESS THAN 20.",
+        test: (digits) => digits.reduce((a, b) => a + b, 0) < 20
+    },
+    {
+        id: "high-sum",
+        name: "OVER THIRTY",
+        icon: "🏋️",
+        rarity: "trash",
+        xp: RARITY_XP.trash,
+        description: "THE DIGITS ADD UP TO 30 OR MORE.",
+        test: (digits) => digits.reduce((a, b) => a + b, 0) >= 30
+    },
+    {
+        id: "matching-ends-parity",
+        name: "MATCHING ENDS",
+        icon: "🎭",
+        rarity: "trash",
+        xp: RARITY_XP.trash,
+        description: "THE FIRST AND LAST DIGIT ARE BOTH EVEN, OR BOTH ODD.",
+        test: (digits) => digits.length >= 2 && digits[0] % 2 === digits[digits.length - 1] % 2
+    },
+    {
+        id: "strong-opener",
+        name: "STRONG OPENER",
+        icon: "💪",
+        rarity: "trash",
+        xp: RARITY_XP.trash,
+        description: "THE FIRST DIGIT IS 8 OR 9.",
+        test: (digits) => digits[0] >= 8
+    },
+    {
+        id: "at-least-triple",
+        name: "THREE OF A KIND",
+        icon: "🎲",
+        rarity: "common",
+        xp: RARITY_XP.common,
+        description: "SOME DIGIT APPEARS THREE OR MORE TIMES.",
+        test: (digits) => Object.values(digitCounts(digits)).some(c => c >= 3)
+    },
+    {
+        id: "parity-palindrome",
+        name: "PARITY PALINDROME",
+        icon: "🪞",
+        rarity: "common",
+        xp: RARITY_XP.common,
+        description: "THE EVEN/ODD PATTERN OF THE DIGITS READS THE SAME BACKWARDS AS FORWARDS.",
+        test: (digits) => {
+            const parity = digits.map(d => d % 2).join("");
+            return parity === [...parity].reverse().join("");
+        }
+    },
+    {
+        id: "front-loaded",
+        name: "FRONT LOADED",
+        icon: "⬅️",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "THE FIRST HALF OF THE DIGITS ADD UP TO MORE THAN THE SECOND HALF.",
+        test: (digits) =>
+            digits.length === 6 &&
+            digits.slice(0, 3).reduce((a, b) => a + b, 0) > digits.slice(3).reduce((a, b) => a + b, 0)
+    },
+    {
+        id: "back-loaded",
+        name: "BACK LOADED",
+        icon: "➡️",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "THE SECOND HALF OF THE DIGITS ADD UP TO MORE THAN THE FIRST HALF.",
+        test: (digits) =>
+            digits.length === 6 &&
+            digits.slice(3).reduce((a, b) => a + b, 0) > digits.slice(0, 3).reduce((a, b) => a + b, 0)
+    },
+    {
+        id: "no-adjacent-repeat",
+        name: "NO REPEATS IN A ROW",
+        icon: "🚷",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "NO TWO ADJACENT DIGITS ARE THE SAME.",
+        test: (digits) => digits.every((d, i) => i === 0 || d !== digits[i - 1])
+    },
+    {
+        id: "equal-halves",
+        name: "EQUAL HALVES",
+        icon: "⚖️",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "THE FIRST THREE DIGITS AND LAST THREE DIGITS ADD UP TO THE SAME TOTAL.",
+        test: (digits) =>
+            digits.length === 6 &&
+            digits.slice(0, 3).reduce((a, b) => a + b, 0) === digits.slice(3).reduce((a, b) => a + b, 0),
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "prime-digits-only",
+        name: "PRIME DIGITS ONLY",
+        icon: "🔢",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "EVERY DIGIT ITSELF IS A PRIME NUMBER (2, 3, 5, OR 7).",
+        test: (digits) => digits.every(d => [2, 3, 5, 7].includes(d))
+    },
+    {
+        id: "composite-only",
+        name: "COMPOSITE ONLY",
+        icon: "🚫",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "NO DIGIT IS A PRIME NUMBER.",
+        test: (digits) => digits.every(d => ![2, 3, 5, 7].includes(d))
+    },
+    {
+        id: "sum-is-cube",
+        name: "CUBIC SUM",
+        icon: "🧊",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "THE DIGITS ADD UP TO A PERFECT CUBE.",
+        test: (digits) => isPerfectCube(digits.reduce((a, b) => a + b, 0))
+    },
+    {
+        id: "mirror-square",
+        name: "MIRROR SQUARE",
+        icon: "🪟",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "THE NUMBER'S REVERSE IS A PERFECT SQUARE, BUT THE NUMBER ITSELF ISN'T.",
+        test: (digits, str, number) => {
+            const reversed = Number([...str].reverse().join(""));
+            return isPerfectSquare(reversed) && !isPerfectSquare(number);
+        }
+    },
+    {
+        id: "so-close",
+        name: "SO CLOSE",
+        icon: "😩",
+        rarity: "mythical",
+        xp: RARITY_XP.mythical,
+        description: "ONE AWAY FROM EVERY DIGIT BEING THE SAME.",
+        test: (digits, str, number) => {
+            if (digits.length < 4) return false;
+            for (let d = 0; d <= 9; d++) {
+                const rep = Number(String(d).repeat(str.length));
+                if (Math.abs(number - rep) === 1) return true;
+            }
+            return false;
+        },
+        highlight: (digits) => digits.map(() => true)
+    }
+
+);
+
+
+/* =====================================================
+   XP
+===================================================== */
+
+function calculateResult(number) {
+
+    const str = String(number);
+
+    const digits =
+        str.split("").map(Number);
+
+
+    const matched =
+        badges.filter(b => {
+
+            try {
+                return b.test(digits, str, number);
+            } catch (e) {
+                return false;
+            }
+
+        });
+
+
+    /*
+        If nothing beyond the trivial
+        "contains/opens/closes" badges
+        was earned, hand out the
+        consolation "NOTHING SPECIAL" badge.
+    */
+
+    const meaningful =
+        matched.filter(b =>
+            !b.id.startsWith("contains-") &&
+            !b.id.startsWith("starts-") &&
+            !b.id.startsWith("ends-")
+        );
+
+    if (meaningful.length === 0) {
+
+        matched.push(
+            badges.find(b => b.id === "boring")
+        );
+
+    }
+
+
+    /*
+        VERY VERY RARE glitch: the roll can come up
+        short a handful of digits instead of six.
+        The fewer digits, the rarer the badge tier —
+        and 1-2 digits is an automatic Mythical
+        overall result, no matter what else matched.
+    */
+
+    if (digits.length < 6) {
+
+        let glitchRarity;
+
+        if (digits.length <= 2) {
+            glitchRarity = "mythical";
+        } else if (digits.length <= 4) {
+            glitchRarity = "legendary";
+        } else {
+            glitchRarity = "rare";
+        }
+
+        matched.push({
+            id: "glitched-roll",
+            name: "GLITCH IN THE MATRIX",
+            icon: "🌀",
+            rarity: glitchRarity,
+            xp: RARITY_XP[glitchRarity],
+            description:
+                `THE ROLL GLITCHED, PRODUCING ONLY ${digits.length} DIGIT${digits.length === 1 ? "" : "S"} INSTEAD OF SIX.`,
+            highlight: () => digits.map(() => true)
+        });
+
+    }
+
+
+    /*
+        Rarer badges land last, right before
+        the overall rarity reveal.
+    */
+
+    matched.sort((a, b) =>
+        RARITY_ORDER.indexOf(a.rarity) -
+        RARITY_ORDER.indexOf(b.rarity)
+    );
+
+
+    const totalXP =
+        matched.reduce((sum, b) => sum + b.xp, 0);
+
+
+    /*
+        Overall rarity comes from the total EP the
+        roll earned (see rarityFromXP) — except a
+        1-2 digit glitch roll always overrides
+        straight to Mythical.
+    */
+
+    const overallRarity =
+        digits.length <= 2
+            ? "mythical"
+            : rarityFromXP(totalXP);
+
+
+    return { digits, str, matched, totalXP, overallRarity };
+
+}
+
+
+/* =====================================================
+   CREATE DIGITS
+===================================================== */
+
+function createRollingDigits(count = 6) {
+
+    resultDigits.innerHTML = "";
+
+    for (let i = 0; i < count; i++) {
+
+        const digit =
+            document.createElement("span");
+
+        digit.className =
+            "result-digit";
+
+        digit.textContent = "0";
+
+        resultDigits.appendChild(digit);
+
+    }
+
+}
+
+
+/* =====================================================
+   ROLL ANIMATION
+===================================================== */
+
+function rollAnimation(number) {
+
+    return new Promise((resolve) => {
+
+        const target =
+            String(number);
+
+        createRollingDigits(target.length);
+
+        const digits =
+            [...document.querySelectorAll(
+                ".result-digit"
+            )];
+
+        resultNumber.classList.add("rolling");
+
+
+        /*
+            Each digit spins independently.
+
+            Digit 1 stops first.
+            Then digit 2.
+            Then digit 3...
+        */
+
+        digits.forEach((digit, index) => {
+
+            let interval;
+
+            const spinTime =
+                750 +
+                index * (330 + 1000); // each digit now reveals 1s later than the one before it
+
+
+            interval =
+                setInterval(() => {
+
+                    digit.textContent =
+                        Math.floor(
+                            Math.random() * 10
+                        );
+
+                }, 55);
+
+
+            setTimeout(() => {
+
+                clearInterval(interval);
+
+                digit.textContent =
+                    target[index];
+
+                digit.classList.add(
+                    "locked"
+                );
+
+
+                /*
+                    Remove the class so
+                    rerolls can animate again.
+                */
+
+                setTimeout(() => {
+
+                    digit.classList.remove(
+                        "locked"
+                    );
+
+                }, 300);
+
+
+                /*
+                    Last digit finished.
+                */
+
+                if (index === digits.length - 1) {
+
+                    setTimeout(() => {
+
+                        resultNumber.classList.remove(
+                            "rolling"
+                        );
+
+                        resolve();
+
+                    }, 250);
+
+                }
+
+            }, spinTime);
+
+        });
+
+    });
+
+}
+
+
+/* =====================================================
+   BADGE RENDERING
+===================================================== */
+
+function renderBadgeElement(badge, digits) {
+
+    const el =
+        document.createElement("div");
+
+    el.className =
+        `badge ${badge.rarity}`;
+
+
+    const highlights =
+        badge.highlight
+            ? badge.highlight(digits)
+            : digits.map(() => false);
+
+
+    const digitsHTML =
+        digits.map((d, i) =>
+            `<span class="digit${highlights[i] ? " highlight" : ""}">${d}</span>`
+        ).join("");
+
+
+    el.innerHTML = `
+        <div class="badge-header">
+            <span class="badge-icon">${badge.icon}</span>
+            <span class="badge-name">${badge.name}</span>
+            <span class="badge-rarity ${badge.rarity}">${badge.rarity.toUpperCase()}</span>
+        </div>
+        <span class="badge-xp">+${badge.xp.toLocaleString()} EP</span>
+        <div class="badge-description">${badge.description}</div>
+        <div class="digits">${digitsHTML}</div>
+    `;
+
+    return el;
+
+}
+
+
+/* =====================================================
+   BADGE ANIMATION
+
+   Badges reveal slowly, one at a time, and this
+   returns a Promise that resolves once the very
+   last badge has finished animating in — so the
+   rarity reveal can wait for it.
+===================================================== */
+
+const BADGE_START_DELAY = 300;
+const BADGE_STEP_DELAY = 180;
+const BADGE_TRANSITION_MS = 600;
+
+function animateBadges(result) {
+
+    return new Promise((resolve) => {
+
+        badgesContainer.innerHTML = "";
+
+        const elements =
+            result.matched.map(badge =>
+                renderBadgeElement(badge, result.digits)
+            );
+
+        elements.forEach(el =>
+            badgesContainer.appendChild(el)
+        );
+
+        badgeCountEl.textContent =
+            `${result.matched.length} BADGES EARNED`;
+
+
+        elements.forEach((el, index) => {
+
+            setTimeout(() => {
+
+                el.classList.add("badge-show");
+
+            }, BADGE_START_DELAY + index * BADGE_STEP_DELAY);
+
+        });
+
+
+        const totalTime =
+            BADGE_START_DELAY +
+            Math.max(0, elements.length - 1) * BADGE_STEP_DELAY +
+            BADGE_TRANSITION_MS;
+
+        setTimeout(() => {
+
+            resolve();
+
+        }, totalTime);
+
+    });
+
+}
+
+
+/* =====================================================
+   RARITY REVEAL
+===================================================== */
+
+function hideRarity() {
+
+    rarityBox.classList.remove("rarity-show");
+
+    RARITY_ORDER.forEach(r => {
+        rarityBox.classList.remove(`rarity-${r}`);
+        resultNumber.classList.remove(`result-${r}`);
+    });
+
+}
+
+function showRarity(rarity) {
+
+    RARITY_ORDER.forEach(r => {
+        rarityBox.classList.remove(`rarity-${r}`);
+        resultNumber.classList.remove(`result-${r}`);
+    });
+
+    rarityBox.classList.add(`rarity-${rarity}`);
+    resultNumber.classList.add(`result-${rarity}`);
+
+
+    rarityLabelEl.textContent =
+        rarity.toUpperCase();
+
+
+    const [lo, hi] =
+        RARITY_TOP_RANGE[rarity];
+
+    const pct =
+        (Math.random() * (hi - lo) + lo);
+
+    topPercentEl.textContent =
+        `TOP ${pct < 1 ? pct.toFixed(1) : Math.round(pct)}%`;
+
+
+    rarityBox.classList.add("rarity-show");
+
+}
+
+
+/* =====================================================
+   SHOW RESULT
+===================================================== */
+
+async function showResult() {
+
+    const number =
+        rollNumber();
+
+    const result =
+        calculateResult(number);
+
+
+    generateButton.disabled = true;
+    rerollButton.disabled = true;
+
+
+    homeScreen.style.display = "none";
+    resultScreen.style.display = "flex";
+
+    hideRarity();
+
+    badgesContainer.innerHTML = "";
+    badgeCountEl.textContent = "0 BADGES EARNED";
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+
+    await rollAnimation(number);
+
+
+    rollXP.textContent =
+        result.totalXP.toLocaleString() + " EP";
+
+
+    await animateBadges(result);
+
+    showRarity(result.overallRarity);
+
+
+    lifetimeEP += result.totalXP;
+
+    totalXPEl.textContent =
+        lifetimeEP.toLocaleString() + " EP";
+
+
+    generateButton.disabled = false;
+    rerollButton.disabled = false;
+
+}
+
+
+/* =====================================================
+   GENERATE
+===================================================== */
+
+generateButton.addEventListener(
+    "click",
+    async () => {
+
+        generateButton.textContent =
+            "ROLLING...";
+
+        await showResult();
+
+        generateButton.textContent =
+            "GENERATE";
+
+    }
+);
+
+
+/* =====================================================
+   REROLL
+===================================================== */
+
+rerollButton.addEventListener(
+    "click",
+    async () => {
+
+        if (rerollButton.disabled) {
+            return;
+        }
+
+
+        rerollButton.disabled = true;
+        rerollButton.textContent = "ROLLING...";
+
+
+        hideRarity();
+
+
+        const number =
+            rollNumber();
+
+        const result =
+            calculateResult(number);
+
+
+        await rollAnimation(number);
+
+
+        rollXP.textContent =
+            result.totalXP.toLocaleString() + " EP";
+
+
+        await animateBadges(result);
+
+        showRarity(result.overallRarity);
+
+
+        lifetimeEP += result.totalXP;
+
+        totalXPEl.textContent =
+            lifetimeEP.toLocaleString() + " EP";
+
+
+        rerollButton.disabled = false;
+        rerollButton.textContent = "↻ REROLL";
+
+    }
+);
+
+
+/* =====================================================
+   THEME
+===================================================== */
+
+const sunButton =
+    document.getElementById("sunBtn");
+
+const systemButton =
+    document.getElementById("systemBtn");
+
+const moonButton =
+    document.getElementById("moonBtn");
+
+
+function setActive(button) {
+
+    document
+        .querySelectorAll(".theme-btn")
+        .forEach(btn => {
+
+            btn.classList.remove("active");
+
+        });
+
+
+    button.classList.add("active");
+
+}
+
+
+sunButton.addEventListener(
+    "click",
+    () => {
+
+        document.body.classList.add("light");
+
+        setActive(sunButton);
+
+    }
+);
+
+
+moonButton.addEventListener(
+    "click",
+    () => {
+
+        document.body.classList.remove("light");
+
+        setActive(moonButton);
+
+    }
+);
+
+
+systemButton.addEventListener(
+    "click",
+    () => {
+
+        const prefersLight =
+            window.matchMedia(
+                "(prefers-color-scheme: light)"
+            ).matches;
+
+
+        document.body.classList.toggle(
+            "light",
+            prefersLight
+        );
+
+
+        setActive(systemButton);
+
+    }
+);
+
+
+/* =====================================================
+   INITIAL STATE
+===================================================== */
+
+createRollingDigits();
+
+hideRarity();
+
+</script>
+
+</body>
+</html>
