@@ -114,6 +114,29 @@
         font-size: 15px;
     }
 
+    .nav-icon-btn {
+        border: 0;
+        border-radius: 50%;
+
+        background: transparent;
+
+        cursor: pointer;
+
+        transition:
+            background 0.15s ease,
+            color 0.15s ease;
+    }
+
+    .nav-icon-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+
+        color: #f1f1f4;
+    }
+
+    body.light .nav-icon-btn:hover {
+        background: rgba(0, 0, 0, 0.06);
+    }
+
     .logo {
         font-size: 19px;
         font-weight: 900;
@@ -894,6 +917,158 @@
     }
 
     /* =========================================
+       INFO MODAL
+    ========================================= */
+
+    .modal-overlay {
+        position: fixed;
+
+        inset: 0;
+
+        display: none;
+
+        align-items: flex-start;
+        justify-content: center;
+
+        padding: 60px 16px;
+
+        background: rgba(5, 5, 8, 0.72);
+
+        z-index: 200;
+
+        overflow-y: auto;
+    }
+
+    .modal-overlay.show {
+        display: flex;
+    }
+
+    .info-modal {
+        width: 480px;
+        max-width: 100%;
+
+        background: var(--panel);
+
+        border: 1px solid var(--border);
+        border-radius: 12px;
+
+        padding: 22px 22px 26px;
+
+        color: var(--text);
+
+        text-align: left;
+
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .info-modal-header {
+        display: flex;
+
+        align-items: center;
+        justify-content: space-between;
+
+        margin-bottom: 6px;
+    }
+
+    .info-modal-title {
+        font-size: 20px;
+        font-weight: 900;
+    }
+
+    .info-modal-close {
+        width: 28px;
+        height: 28px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border: 0;
+        border-radius: 6px;
+
+        background: transparent;
+
+        color: var(--muted);
+
+        font-size: 18px;
+        font-weight: 900;
+
+        cursor: pointer;
+    }
+
+    .info-modal-close:hover {
+        background: rgba(255, 255, 255, 0.08);
+
+        color: var(--text);
+    }
+
+    .info-section-title {
+        margin-top: 18px;
+        margin-bottom: 8px;
+
+        color: var(--muted);
+
+        font-size: 11px;
+        font-weight: 900;
+
+        letter-spacing: 0.5px;
+    }
+
+    .info-modal p {
+        color: var(--muted);
+
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .info-modal p + p {
+        margin-top: 8px;
+    }
+
+    .rarity-guide-row {
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        padding: 7px 0;
+
+        border-bottom: 1px solid var(--border);
+
+        font-size: 12px;
+    }
+
+    .rarity-guide-row:last-child {
+        border-bottom: 0;
+    }
+
+    .rarity-guide-swatch {
+        width: 10px;
+        height: 10px;
+
+        flex-shrink: 0;
+
+        border-radius: 50%;
+    }
+
+    .rarity-guide-name {
+        flex-shrink: 0;
+
+        width: 82px;
+
+        font-weight: 900;
+
+        letter-spacing: 0.3px;
+    }
+
+    .rarity-guide-detail {
+        color: var(--muted);
+
+        font-size: 11px;
+    }
+
+    /* =========================================
        LIGHT MODE
     ========================================= */
 
@@ -993,9 +1168,9 @@
             RNGdom
         </div>
 
-        <div class="nav-icon">
+        <button class="nav-icon nav-icon-btn" id="infoButton" title="How to play" aria-label="How to play">
             ?
-        </div>
+        </button>
 
         <div class="nav-icon">
             🎮
@@ -1176,6 +1351,57 @@
     </div>
 
 </section>
+
+
+<!-- =========================================
+     INFO MODAL
+========================================= -->
+
+<div class="modal-overlay" id="infoOverlay">
+
+    <div class="info-modal">
+
+        <div class="info-modal-header">
+
+            <span class="info-modal-title">
+                HOW TO PLAY
+            </span>
+
+            <button class="info-modal-close" id="infoClose" aria-label="Close">
+                ✕
+            </button>
+
+        </div>
+
+        <p>
+            Hit GENERATE to roll a random number. Every pattern it matches
+            (contains a digit, is prime, is a palindrome, and dozens more)
+            earns you a badge and some EP. Roll as many times as you want —
+            there's no daily limit, so see how lucky you get.
+        </p>
+
+        <p id="infoBadgeCount"></p>
+
+        <div class="info-section-title">
+            OVERALL RARITY
+        </div>
+
+        <p>
+            Your overall rarity isn't just your single best badge — it's
+            based on the total EP every badge you earned adds up to.
+        </p>
+
+        <div id="rarityGuideList"></div>
+
+        <div class="info-section-title">
+            THE GLITCH
+        </div>
+
+        <p id="infoGlitch"></p>
+
+    </div>
+
+</div>
 
 
 <script>
@@ -2957,6 +3183,106 @@ systemButton.addEventListener(
 
     }
 );
+
+
+/* =====================================================
+   INFO MODAL
+===================================================== */
+
+const infoButton =
+    document.getElementById("infoButton");
+
+const infoOverlay =
+    document.getElementById("infoOverlay");
+
+const infoClose =
+    document.getElementById("infoClose");
+
+const rarityGuideList =
+    document.getElementById("rarityGuideList");
+
+const infoBadgeCount =
+    document.getElementById("infoBadgeCount");
+
+const infoGlitch =
+    document.getElementById("infoGlitch");
+
+
+function buildRarityGuide() {
+
+    rarityGuideList.innerHTML =
+        RARITY_ORDER
+            .slice()
+            .reverse()
+            .map(r => {
+
+                const [lo, hi] =
+                    RARITY_TOP_RANGE[r];
+
+                const topLabel =
+                    `TOP ${lo < 1 ? lo : Math.round(lo)}–${hi < 1 ? hi : Math.round(hi)}%`;
+
+                return `
+                    <div class="rarity-guide-row">
+                        <span class="rarity-guide-swatch" style="background:var(--${r})"></span>
+                        <span class="rarity-guide-name" style="color:var(--${r})">${r.toUpperCase()}</span>
+                        <span class="rarity-guide-detail">${RARITY_EP_THRESHOLDS[r].toLocaleString()}+ EP · ${topLabel}</span>
+                    </div>
+                `;
+
+            })
+            .join("");
+
+}
+
+function buildInfoText() {
+
+    infoBadgeCount.textContent =
+        `There are ${badges.length}+ badges to discover, across six rarity tiers.`;
+
+    const glitchPct =
+        (GLITCH_CHANCE * 100).toFixed(1);
+
+    infoGlitch.textContent =
+        `About a ${glitchPct}% chance per roll to come up short a few digits instead of six ` +
+        `— the fewer digits, the rarer, and rolling only 1-2 digits is an automatic Mythical.`;
+
+}
+
+function openInfoModal() {
+
+    buildRarityGuide();
+    buildInfoText();
+
+    infoOverlay.classList.add("show");
+
+}
+
+function closeInfoModal() {
+
+    infoOverlay.classList.remove("show");
+
+}
+
+infoButton.addEventListener("click", openInfoModal);
+
+infoClose.addEventListener("click", closeInfoModal);
+
+infoOverlay.addEventListener("click", (e) => {
+
+    if (e.target === infoOverlay) {
+        closeInfoModal();
+    }
+
+});
+
+document.addEventListener("keydown", (e) => {
+
+    if (e.key === "Escape" && infoOverlay.classList.contains("show")) {
+        closeInfoModal();
+    }
+
+});
 
 
 /* =====================================================
