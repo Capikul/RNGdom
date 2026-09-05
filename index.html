@@ -1284,6 +1284,93 @@
         transform: translateY(-1px);
     }
 
+    .admin-lock-input {
+        width: 100%;
+
+        margin-top: 14px;
+
+        padding: 12px 14px;
+
+        border: 1px solid var(--border);
+        border-radius: 8px;
+
+        background: var(--panel-hover);
+
+        color: var(--text);
+
+        font-size: 15px;
+        font-weight: 700;
+
+        letter-spacing: 2px;
+
+        text-align: center;
+
+        transition: border-color 0.15s ease;
+    }
+
+    .admin-lock-input:focus {
+        outline: none;
+
+        border-color: #b929ff;
+    }
+
+    .admin-lock-input.shake {
+        animation: adminShake 0.3s ease;
+
+        border-color: #ff4d6d;
+    }
+
+    @keyframes adminShake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-6px); }
+        75% { transform: translateX(6px); }
+    }
+
+    .admin-lock-error {
+        margin-top: 8px;
+
+        min-height: 14px;
+
+        color: #ff4d6d;
+
+        font-size: 11px;
+        font-weight: 800;
+
+        letter-spacing: 0.3px;
+    }
+
+    .admin-lock-btn {
+        width: 100%;
+
+        margin-top: 12px;
+
+        padding: 12px;
+
+        border: 1px solid var(--border);
+        border-radius: 8px;
+
+        background: var(--panel-hover);
+
+        color: var(--text);
+
+        font-size: 13px;
+        font-weight: 900;
+
+        letter-spacing: 1px;
+
+        cursor: pointer;
+
+        transition:
+            background 0.15s ease,
+            transform 0.15s ease;
+    }
+
+    .admin-lock-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+
+        transform: translateY(-1px);
+    }
+
     /* =========================================
        CHANGELOG
     ========================================= */
@@ -1459,7 +1546,7 @@
         </button>
 
         <button class="version-badge" id="changelogButton" title="Changelog" aria-label="Changelog">
-            v1.3
+            v1.4
         </button>
 
         <div class="nav-icon">
@@ -1760,52 +1847,79 @@
 
         </div>
 
-        <p>
-            Force the outcome of your next roll, then hit
-            <strong>FORCE ROLL</strong>. Press <strong>`</strong> anytime to
-            reopen this panel. Overrides are one-shot — they reset back to
-            random right after the roll they're used on.
-        </p>
+        <div id="adminLock">
 
-        <div class="info-section-title">
-            DIGIT COUNT
-        </div>
+            <p>
+                This panel is password protected. Enter the admin
+                password to continue.
+            </p>
 
-        <div class="admin-options" id="adminDigitOptions">
+            <input
+                type="password"
+                class="admin-lock-input"
+                id="adminPasswordInput"
+                placeholder="PASSWORD"
+                autocomplete="off"
+            >
 
-            <button class="admin-option active" data-digits="random">RANDOM</button>
-            <button class="admin-option" data-digits="6">6</button>
-            <button class="admin-option" data-digits="5">5</button>
-            <button class="admin-option" data-digits="4">4</button>
-            <button class="admin-option" data-digits="3">3</button>
-            <button class="admin-option" data-digits="2">2</button>
-            <button class="admin-option" data-digits="1">1</button>
+            <p class="admin-lock-error" id="adminPasswordError"></p>
 
-        </div>
-
-        <div class="info-section-title">
-            OVERALL RARITY
-        </div>
-
-        <div class="admin-options" id="adminRarityOptions">
-
-            <button class="admin-option active" data-rarity="random">RANDOM</button>
-            <button class="admin-option" data-rarity="trash" style="color:var(--trash)">TRASH</button>
-            <button class="admin-option" data-rarity="common" style="color:var(--common)">COMMON</button>
-            <button class="admin-option" data-rarity="uncommon" style="color:var(--uncommon)">UNCOMMON</button>
-            <button class="admin-option" data-rarity="rare" style="color:var(--rare)">RARE</button>
-            <button class="admin-option" data-rarity="legendary" style="color:var(--legendary)">LEGENDARY</button>
-            <button class="admin-option" data-rarity="mythical" style="color:var(--mythical)">MYTHICAL</button>
-            <button class="admin-option" data-rarity="godly" style="color:var(--godly)" title="Secret tier — normally only reachable by rolling exactly 69">GODLY 🔒</button>
-
-        </div>
-
-        <p id="adminNote"></p>
-
-        <div class="admin-actions">
-            <button class="admin-roll-btn" id="adminRollBtn">
-                ⚡ FORCE ROLL
+            <button class="admin-lock-btn" id="adminPasswordSubmit">
+                UNLOCK
             </button>
+
+        </div>
+
+        <div id="adminPanelContent" style="display:none">
+
+            <p>
+                Force the outcome of your next roll, then hit
+                <strong>FORCE ROLL</strong>. Press <strong>`</strong> anytime to
+                reopen this panel. Overrides are one-shot — they reset back to
+                random right after the roll they're used on.
+            </p>
+
+            <div class="info-section-title">
+                DIGIT COUNT
+            </div>
+
+            <div class="admin-options" id="adminDigitOptions">
+
+                <button class="admin-option active" data-digits="random">RANDOM</button>
+                <button class="admin-option" data-digits="6">6</button>
+                <button class="admin-option" data-digits="5">5</button>
+                <button class="admin-option" data-digits="4">4</button>
+                <button class="admin-option" data-digits="3">3</button>
+                <button class="admin-option" data-digits="2">2</button>
+                <button class="admin-option" data-digits="1">1</button>
+
+            </div>
+
+            <div class="info-section-title">
+                OVERALL RARITY
+            </div>
+
+            <div class="admin-options" id="adminRarityOptions">
+
+                <button class="admin-option active" data-rarity="random">RANDOM</button>
+                <button class="admin-option" data-rarity="trash" style="color:var(--trash)">TRASH</button>
+                <button class="admin-option" data-rarity="common" style="color:var(--common)">COMMON</button>
+                <button class="admin-option" data-rarity="uncommon" style="color:var(--uncommon)">UNCOMMON</button>
+                <button class="admin-option" data-rarity="rare" style="color:var(--rare)">RARE</button>
+                <button class="admin-option" data-rarity="legendary" style="color:var(--legendary)">LEGENDARY</button>
+                <button class="admin-option" data-rarity="mythical" style="color:var(--mythical)">MYTHICAL</button>
+                <button class="admin-option" data-rarity="godly" style="color:var(--godly)" title="Secret tier — normally only reachable by rolling exactly 69">GODLY 🔒</button>
+
+            </div>
+
+            <p id="adminNote"></p>
+
+            <div class="admin-actions">
+                <button class="admin-roll-btn" id="adminRollBtn">
+                    ⚡ FORCE ROLL
+                </button>
+            </div>
+
         </div>
 
     </div>
@@ -1834,12 +1948,22 @@
         </div>
 
         <div class="changelog-version">
-            <span class="changelog-version-number">v1.3</span>
+            <span class="changelog-version-number">v1.4</span>
             <span class="changelog-version-tag">CURRENT</span>
         </div>
 
         <ul class="changelog-list">
-            <li>Something's hiding in the RNG. You'll know it when you see it. 👑</li>
+            <li>Reworked the DP thresholds for overall rarity: Common 0-5K, Uncommon 5K-17.5K, Rare 17.5K-40K, Legendary 40K-100K, Mythical 100K+.</li>
+            <li>Added 100 new badges inspired by the periodic table — one for each element from Hydrogen to Fermium, earned only when a glitch roll lands on that exact atomic number.</li>
+            <li>The Admin Panel is now password protected.</li>
+        </ul>
+
+        <div class="changelog-version">
+            <span class="changelog-version-number">v1.3</span>
+        </div>
+
+        <ul class="changelog-list">
+            <li>Small under-the-hood tweaks and stability improvements.</li>
         </ul>
 
         <div class="changelog-version">
@@ -1995,11 +2119,11 @@ const DISPLAY_RARITIES =
 
 const RARITY_EP_THRESHOLDS = {
     trash: 0,
-    common: 2000,
-    uncommon: 8000,
-    rare: 26000,
-    legendary: 80000,
-    mythical: 200000
+    common: 0,
+    uncommon: 5000,
+    rare: 17500,
+    legendary: 40000,
+    mythical: 100000
 };
 
 function rarityFromXP(totalXP) {
@@ -2200,6 +2324,18 @@ let adminForcedRarity = null;
 
 function getNextNumber() {
 
+    /*
+        Godly is a secret tier that's only ever supposed to be
+        reachable by rolling the exact two-digit number 69. So if
+        the admin panel forces "godly", the number ALWAYS comes
+        out as 69 — no matter what digit count is also selected —
+        rather than letting a forced digit count produce some
+        other number under a fake godly label.
+    */
+    if (adminForcedRarity === "godly") {
+        return 69;
+    }
+
     if (adminForcedDigits) {
         return numberOfLength(adminForcedDigits);
     }
@@ -2211,7 +2347,7 @@ function getNextNumber() {
 
 /* =====================================================
    BADGE LIBRARY
-   ~185 badge definitions across 6 rarity tiers.
+   ~285 badge definitions across 6 rarity tiers.
    Each badge has: id, name, icon, rarity, xp,
    description, test(digits, str, number), and an
    optional highlight(digits) returning true/false
@@ -2324,6 +2460,82 @@ for (let d = 0; d <= 9; d++) {
         description: `DIVISIBLE BY ${div} WITH NO REMAINDER.`,
         test: (digits, str, number) => number % div === 0
     });
+});
+
+/* --- periodic table: the roll equals an element's atomic number (x100) ---
+   Elements 1-9 need a 1-digit glitch roll, 10-99 need a 2-digit glitch
+   roll, and 100 (Fermium) needs a 3-digit glitch roll — so these only
+   ever come from the rare short rolls, never a normal 6-digit roll. */
+const ELEMENTS = [
+    { n: 1, sym: "H", name: "HYDROGEN" }, { n: 2, sym: "HE", name: "HELIUM" },
+    { n: 3, sym: "LI", name: "LITHIUM" }, { n: 4, sym: "BE", name: "BERYLLIUM" },
+    { n: 5, sym: "B", name: "BORON" }, { n: 6, sym: "C", name: "CARBON" },
+    { n: 7, sym: "N", name: "NITROGEN" }, { n: 8, sym: "O", name: "OXYGEN" },
+    { n: 9, sym: "F", name: "FLUORINE" }, { n: 10, sym: "NE", name: "NEON" },
+    { n: 11, sym: "NA", name: "SODIUM" }, { n: 12, sym: "MG", name: "MAGNESIUM" },
+    { n: 13, sym: "AL", name: "ALUMINUM" }, { n: 14, sym: "SI", name: "SILICON" },
+    { n: 15, sym: "P", name: "PHOSPHORUS" }, { n: 16, sym: "S", name: "SULFUR" },
+    { n: 17, sym: "CL", name: "CHLORINE" }, { n: 18, sym: "AR", name: "ARGON" },
+    { n: 19, sym: "K", name: "POTASSIUM" }, { n: 20, sym: "CA", name: "CALCIUM" },
+    { n: 21, sym: "SC", name: "SCANDIUM" }, { n: 22, sym: "TI", name: "TITANIUM" },
+    { n: 23, sym: "V", name: "VANADIUM" }, { n: 24, sym: "CR", name: "CHROMIUM" },
+    { n: 25, sym: "MN", name: "MANGANESE" }, { n: 26, sym: "FE", name: "IRON" },
+    { n: 27, sym: "CO", name: "COBALT" }, { n: 28, sym: "NI", name: "NICKEL" },
+    { n: 29, sym: "CU", name: "COPPER" }, { n: 30, sym: "ZN", name: "ZINC" },
+    { n: 31, sym: "GA", name: "GALLIUM" }, { n: 32, sym: "GE", name: "GERMANIUM" },
+    { n: 33, sym: "AS", name: "ARSENIC" }, { n: 34, sym: "SE", name: "SELENIUM" },
+    { n: 35, sym: "BR", name: "BROMINE" }, { n: 36, sym: "KR", name: "KRYPTON" },
+    { n: 37, sym: "RB", name: "RUBIDIUM" }, { n: 38, sym: "SR", name: "STRONTIUM" },
+    { n: 39, sym: "Y", name: "YTTRIUM" }, { n: 40, sym: "ZR", name: "ZIRCONIUM" },
+    { n: 41, sym: "NB", name: "NIOBIUM" }, { n: 42, sym: "MO", name: "MOLYBDENUM" },
+    { n: 43, sym: "TC", name: "TECHNETIUM" }, { n: 44, sym: "RU", name: "RUTHENIUM" },
+    { n: 45, sym: "RH", name: "RHODIUM" }, { n: 46, sym: "PD", name: "PALLADIUM" },
+    { n: 47, sym: "AG", name: "SILVER" }, { n: 48, sym: "CD", name: "CADMIUM" },
+    { n: 49, sym: "IN", name: "INDIUM" }, { n: 50, sym: "SN", name: "TIN" },
+    { n: 51, sym: "SB", name: "ANTIMONY" }, { n: 52, sym: "TE", name: "TELLURIUM" },
+    { n: 53, sym: "I", name: "IODINE" }, { n: 54, sym: "XE", name: "XENON" },
+    { n: 55, sym: "CS", name: "CESIUM" }, { n: 56, sym: "BA", name: "BARIUM" },
+    { n: 57, sym: "LA", name: "LANTHANUM" }, { n: 58, sym: "CE", name: "CERIUM" },
+    { n: 59, sym: "PR", name: "PRASEODYMIUM" }, { n: 60, sym: "ND", name: "NEODYMIUM" },
+    { n: 61, sym: "PM", name: "PROMETHIUM" }, { n: 62, sym: "SM", name: "SAMARIUM" },
+    { n: 63, sym: "EU", name: "EUROPIUM" }, { n: 64, sym: "GD", name: "GADOLINIUM" },
+    { n: 65, sym: "TB", name: "TERBIUM" }, { n: 66, sym: "DY", name: "DYSPROSIUM" },
+    { n: 67, sym: "HO", name: "HOLMIUM" }, { n: 68, sym: "ER", name: "ERBIUM" },
+    { n: 69, sym: "TM", name: "THULIUM" }, { n: 70, sym: "YB", name: "YTTERBIUM" },
+    { n: 71, sym: "LU", name: "LUTETIUM" }, { n: 72, sym: "HF", name: "HAFNIUM" },
+    { n: 73, sym: "TA", name: "TANTALUM" }, { n: 74, sym: "W", name: "TUNGSTEN" },
+    { n: 75, sym: "RE", name: "RHENIUM" }, { n: 76, sym: "OS", name: "OSMIUM" },
+    { n: 77, sym: "IR", name: "IRIDIUM" }, { n: 78, sym: "PT", name: "PLATINUM" },
+    { n: 79, sym: "AU", name: "GOLD" }, { n: 80, sym: "HG", name: "MERCURY" },
+    { n: 81, sym: "TL", name: "THALLIUM" }, { n: 82, sym: "PB", name: "LEAD" },
+    { n: 83, sym: "BI", name: "BISMUTH" }, { n: 84, sym: "PO", name: "POLONIUM" },
+    { n: 85, sym: "AT", name: "ASTATINE" }, { n: 86, sym: "RN", name: "RADON" },
+    { n: 87, sym: "FR", name: "FRANCIUM" }, { n: 88, sym: "RA", name: "RADIUM" },
+    { n: 89, sym: "AC", name: "ACTINIUM" }, { n: 90, sym: "TH", name: "THORIUM" },
+    { n: 91, sym: "PA", name: "PROTACTINIUM" }, { n: 92, sym: "U", name: "URANIUM" },
+    { n: 93, sym: "NP", name: "NEPTUNIUM" }, { n: 94, sym: "PU", name: "PLUTONIUM" },
+    { n: 95, sym: "AM", name: "AMERICIUM" }, { n: 96, sym: "CM", name: "CURIUM" },
+    { n: 97, sym: "BK", name: "BERKELIUM" }, { n: 98, sym: "CF", name: "CALIFORNIUM" },
+    { n: 99, sym: "ES", name: "EINSTEINIUM" }, { n: 100, sym: "FM", name: "FERMIUM" }
+];
+
+ELEMENTS.forEach(({ n, sym, name }) => {
+
+    const rarity =
+        n < 10 ? "rare" :
+        n < 100 ? "legendary" :
+        "mythical";
+
+    badges.push({
+        id: `element-${n}`,
+        name: `${name} (${sym})`,
+        icon: "⚛️",
+        rarity,
+        xp: RARITY_XP[rarity],
+        description: `THE NUMBER IS EXACTLY ${n} — THE ATOMIC NUMBER OF ${name}.`,
+        test: (digits, str, number) => number === n
+    });
+
 });
 
 /* --- hand-authored badges --- */
@@ -4431,8 +4643,97 @@ const adminRollBtn =
 const adminNote =
     document.getElementById("adminNote");
 
+const adminLock =
+    document.getElementById("adminLock");
+
+const adminPanelContent =
+    document.getElementById("adminPanelContent");
+
+const adminPasswordInput =
+    document.getElementById("adminPasswordInput");
+
+const adminPasswordError =
+    document.getElementById("adminPasswordError");
+
+const adminPasswordSubmit =
+    document.getElementById("adminPasswordSubmit");
+
+
+/*
+    The admin panel is password protected. Once unlocked,
+    it stays unlocked for the rest of the session — the
+    password is only asked for the first time it's opened
+    (or after a page refresh).
+*/
+const ADMIN_PASSWORD = "3109";
+let adminUnlocked = false;
+
+function showAdminLock() {
+
+    adminLock.style.display = "block";
+    adminPanelContent.style.display = "none";
+
+    adminPasswordInput.value = "";
+    adminPasswordError.textContent = "";
+
+    setTimeout(() => adminPasswordInput.focus(), 50);
+
+}
+
+function showAdminPanelContent() {
+
+    adminLock.style.display = "none";
+    adminPanelContent.style.display = "block";
+
+    updateAdminNote();
+
+}
+
+function attemptAdminUnlock() {
+
+    if (adminPasswordInput.value === ADMIN_PASSWORD) {
+
+        adminUnlocked = true;
+
+        showAdminPanelContent();
+
+    } else {
+
+        adminPasswordError.textContent = "INCORRECT PASSWORD.";
+
+        adminPasswordInput.classList.remove("shake");
+        void adminPasswordInput.offsetWidth;
+        adminPasswordInput.classList.add("shake");
+
+        adminPasswordInput.value = "";
+        adminPasswordInput.focus();
+
+    }
+
+}
+
+adminPasswordSubmit.addEventListener("click", attemptAdminUnlock);
+
+adminPasswordInput.addEventListener("keydown", (e) => {
+
+    if (e.key === "Enter") {
+        attemptAdminUnlock();
+    }
+
+});
+
 
 function updateAdminNote() {
+
+    if (adminForcedRarity === "godly") {
+
+        adminNote.textContent =
+            "Next roll: forced to GODLY — the number will always be exactly 69, " +
+            "regardless of the digit count selected above.";
+
+        return;
+
+    }
 
     const digitText =
         adminForcedDigits
@@ -4520,7 +4821,11 @@ adminRarityOptions.addEventListener("click", (e) => {
 
 function openAdminModal() {
 
-    updateAdminNote();
+    if (adminUnlocked) {
+        showAdminPanelContent();
+    } else {
+        showAdminLock();
+    }
 
     adminOverlay.classList.add("show");
 
