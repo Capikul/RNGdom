@@ -34,6 +34,7 @@
         --rare: #448eff;
         --legendary: #ffb020;
         --mythical: #ef4fe0;
+        --godly: #fff4c2;
     }
 
     html {
@@ -134,6 +135,47 @@
     }
 
     body.light .nav-icon-btn:hover {
+        background: rgba(0, 0, 0, 0.06);
+    }
+
+    .version-badge {
+        height: 20px;
+
+        padding: 0 8px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border: 1px solid #48464e;
+        border-radius: 10px;
+
+        background: transparent;
+
+        color: #9998a0;
+
+        font-size: 10px;
+        font-weight: 900;
+
+        letter-spacing: 0.3px;
+
+        cursor: pointer;
+
+        transition:
+            background 0.15s ease,
+            color 0.15s ease,
+            border-color 0.15s ease;
+    }
+
+    .version-badge:hover {
+        background: rgba(255, 255, 255, 0.08);
+
+        border-color: #6a6772;
+
+        color: #f1f1f4;
+    }
+
+    body.light .version-badge:hover {
         background: rgba(0, 0, 0, 0.06);
     }
 
@@ -478,6 +520,25 @@
         box-shadow: 0 0 26px rgba(239, 79, 224, 0.45);
     }
 
+    .result-number.result-godly {
+        border-color: var(--godly);
+        color: var(--godly);
+        animation: godlyPulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes godlyPulse {
+        0%, 100% {
+            box-shadow:
+                0 0 26px rgba(255, 244, 194, 0.55),
+                0 0 50px rgba(255, 210, 90, 0.3);
+        }
+        50% {
+            box-shadow:
+                0 0 40px rgba(255, 244, 194, 0.85),
+                0 0 80px rgba(255, 210, 90, 0.5);
+        }
+    }
+
     .result-digits {
         display: flex;
         justify-content: center;
@@ -586,6 +647,7 @@
     .rarity.rarity-rare .rarity-label        { border-color: var(--rare);      color: var(--rare); }
     .rarity.rarity-legendary .rarity-label   { border-color: var(--legendary); color: var(--legendary); }
     .rarity.rarity-mythical .rarity-label    { border-color: var(--mythical);  color: var(--mythical); box-shadow: 0 0 14px rgba(239, 79, 224, 0.5); }
+    .rarity.rarity-godly .rarity-label       { border-color: var(--godly);     color: var(--godly);    box-shadow: 0 0 16px rgba(255, 244, 194, 0.6); animation: godlyPulse 1.6s ease-in-out infinite; }
 
     .top-percent {
         color: #00d97e;
@@ -597,6 +659,7 @@
     .rarity.rarity-rare .top-percent       { color: var(--rare); }
     .rarity.rarity-legendary .top-percent  { color: var(--legendary); }
     .rarity.rarity-mythical .top-percent   { color: var(--mythical); }
+    .rarity.rarity-godly .top-percent      { color: var(--godly); }
 
     .result-xp {
         display: inline-block;
@@ -819,6 +882,7 @@
     .badge.rare          { border-color: #38536d; }
     .badge.legendary     { border-color: #7a5417; box-shadow: 0 0 16px rgba(255, 176, 32, 0.08); }
     .badge.mythical      { border-color: #7c2a76; box-shadow: 0 0 20px rgba(239, 79, 224, 0.16); }
+    .badge.godly         { border-color: #cba750; animation: godlyPulse 1.6s ease-in-out infinite; }
 
     .badge-header {
         display: flex;
@@ -890,6 +954,16 @@
         background: rgba(239, 79, 224, 0.12);
 
         border: 1px solid #a72d9c;
+    }
+
+    .badge-rarity.godly {
+        color: #7a5f00;
+
+        background: linear-gradient(100deg, #fff4c2, #ffd76a, #fff4c2);
+
+        border: 1px solid #cba750;
+
+        font-weight: 900;
     }
 
     .badge-xp {
@@ -1211,6 +1285,76 @@
     }
 
     /* =========================================
+       CHANGELOG
+    ========================================= */
+
+    .changelog-version {
+        display: flex;
+
+        align-items: baseline;
+
+        gap: 8px;
+
+        margin-top: 18px;
+        margin-bottom: 8px;
+    }
+
+    .changelog-version:first-of-type {
+        margin-top: 4px;
+    }
+
+    .changelog-version-number {
+        color: var(--text);
+
+        font-size: 14px;
+        font-weight: 900;
+    }
+
+    .changelog-version-tag {
+        padding: 2px 7px;
+
+        border-radius: 8px;
+
+        background: rgba(139, 92, 246, 0.18);
+
+        color: #b98bff;
+
+        font-size: 9px;
+        font-weight: 900;
+
+        letter-spacing: 0.3px;
+    }
+
+    .changelog-list {
+        list-style: none;
+
+        display: flex;
+        flex-direction: column;
+
+        gap: 5px;
+    }
+
+    .changelog-list li {
+        position: relative;
+
+        padding-left: 14px;
+
+        color: var(--muted);
+
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .changelog-list li::before {
+        content: "•";
+
+        position: absolute;
+        left: 0;
+
+        color: #6a6772;
+    }
+
+    /* =========================================
        LIGHT MODE
     ========================================= */
 
@@ -1312,6 +1456,10 @@
 
         <button class="nav-icon nav-icon-btn" id="infoButton" title="How to play" aria-label="How to play">
             ?
+        </button>
+
+        <button class="version-badge" id="changelogButton" title="Changelog" aria-label="Changelog">
+            v1.3
         </button>
 
         <div class="nav-icon">
@@ -1648,6 +1796,7 @@
             <button class="admin-option" data-rarity="rare" style="color:var(--rare)">RARE</button>
             <button class="admin-option" data-rarity="legendary" style="color:var(--legendary)">LEGENDARY</button>
             <button class="admin-option" data-rarity="mythical" style="color:var(--mythical)">MYTHICAL</button>
+            <button class="admin-option" data-rarity="godly" style="color:var(--godly)" title="Secret tier — normally only reachable by rolling exactly 69">GODLY 🔒</button>
 
         </div>
 
@@ -1658,6 +1807,80 @@
                 ⚡ FORCE ROLL
             </button>
         </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     CHANGELOG
+========================================= -->
+
+<div class="modal-overlay" id="changelogOverlay">
+
+    <div class="info-modal">
+
+        <div class="info-modal-header">
+
+            <span class="info-modal-title">
+                📜 CHANGELOG
+            </span>
+
+            <button class="info-modal-close" id="changelogClose" aria-label="Close">
+                ✕
+            </button>
+
+        </div>
+
+        <div class="changelog-version">
+            <span class="changelog-version-number">v1.3</span>
+            <span class="changelog-version-tag">CURRENT</span>
+        </div>
+
+        <ul class="changelog-list">
+            <li>Something's hiding in the RNG. You'll know it when you see it. 👑</li>
+        </ul>
+
+        <div class="changelog-version">
+            <span class="changelog-version-number">v1.2</span>
+        </div>
+
+        <ul class="changelog-list">
+            <li>Renamed the game to RNGdom, and EP to DP (Digit Points).</li>
+            <li>Replaced the 7 hand-coded badges with a dynamic library of 185+ badges covering digit patterns, math properties, streaks, digit sums, and joke/meme numbers.</li>
+            <li>Added six overall rarity tiers — Trash, Common, Uncommon, Rare, Legendary, Mythical — each with its own color.</li>
+            <li>DP is now the literal sum of every badge you earned, and your lifetime DP accumulates across the whole session.</li>
+            <li>Numbers roll noticeably slower, locking in one digit at a time.</li>
+            <li>The number box turns neutral grey while rolling, then recolors to match the rarity once it's revealed.</li>
+            <li>Added a very rare "glitch" chance for a roll to come up with fewer than 6 digits — the fewer digits, the rarer, with 1-2 digits an automatic Mythical.</li>
+            <li>Glitch rolls now spin all 6 digits first for suspense, then smoothly collapse away the digits they don't need.</li>
+            <li>Fixed overall rarity so it's floored by digit count, not just DP — short rolls can no longer undershoot into a low tier.</li>
+            <li>Raised the DP thresholds required for each rarity tier.</li>
+            <li>Added a badge spotlight animation and a session spin counter.</li>
+            <li>Added an in-game "How to Play" info modal explaining DP, the rarity tiers, and the glitch mechanic.</li>
+            <li>Added a fan-game disclaimer modal shown on load.</li>
+            <li>Added a hidden Admin Panel (press <strong>`</strong>) to force a specific digit count and/or rarity for testing.</li>
+            <li>Added this changelog.</li>
+        </ul>
+
+        <div class="changelog-version">
+            <span class="changelog-version-number">v1.1</span>
+        </div>
+
+        <ul class="changelog-list">
+            <li>Badges now reveal more slowly, one at a time, instead of all at once.</li>
+            <li>The overall rarity stays hidden and fades in only after every badge has finished revealing.</li>
+        </ul>
+
+        <div class="changelog-version">
+            <span class="changelog-version-number">v1.0</span>
+        </div>
+
+        <ul class="changelog-list">
+            <li>Initial release: roll a random number, earn a handful of badges, and see your rarity.</li>
+            <li>Included a "Today's Best Roll" leaderboard card, Sign In, Leaderboard, Share button, and a countdown to your next daily roll.</li>
+        </ul>
 
     </div>
 
@@ -1728,7 +1951,8 @@ const RARITY_XP = {
     uncommon: 650,
     rare: 1600,
     legendary: 4200,
-    mythical: 12000
+    mythical: 12000,
+    godly: 1000000
 };
 
 const RARITY_TOP_RANGE = {
@@ -1737,8 +1961,23 @@ const RARITY_TOP_RANGE = {
     uncommon:   [22, 50],
     rare:       [7, 22],
     legendary:  [1, 7],
-    mythical:   [0.1, 1]
+    mythical:   [0.1, 1],
+    godly:      [0.0001, 0.001]
 };
+
+/*
+    GODLY is a secret 7th tier, deliberately left out
+    of RARITY_ORDER. It's not part of the normal DP
+    ladder (rarityFromXP can never produce it) and it's
+    left out of the public rarity guide in the info
+    modal on purpose — the only ways to see it are
+    rolling exactly 69, or forcing it from the admin
+    panel. DISPLAY_RARITIES is only for cosmetic
+    bookkeeping (clearing/sorting classes) that does
+    need to know it exists.
+*/
+const DISPLAY_RARITIES =
+    [...RARITY_ORDER, "godly"];
 
 /*
     Overall rarity is based on how much total DP
@@ -2543,6 +2782,26 @@ badges.push(
         xp: RARITY_XP.trash,
         description: "NO OTHER PATTERN WAS FOUND IN THIS ROLL.",
         test: () => false // handled manually below
+    },
+    {
+        /*
+            SECRET. Only fires when the entire roll IS
+            the two-digit number 69 — not a 6-digit
+            roll that merely contains "69" somewhere in
+            it (that's the separate "NICE" badge above).
+            digits.length === 2 is checked explicitly,
+            even though number === 69 already implies it,
+            so the intent can't drift if this ever gets
+            edited later.
+        */
+        id: "godly-69",
+        name: "GODLY",
+        icon: "👑",
+        rarity: "godly",
+        xp: RARITY_XP.godly,
+        description: "SECRET: THE ENTIRE ROLL WAS EXACTLY 69. NICE.",
+        test: (digits, str, number) => digits.length === 2 && number === 69,
+        highlight: (digits) => digits.map(() => true)
     },
 
     /* --- big batch of extra badges --- */
@@ -3389,8 +3648,10 @@ function calculateResult(number, forcedRarity = null) {
         const provisionalXP =
             matched.reduce((sum, b) => sum + b.xp, 0);
 
+        // godly has no DP threshold (it's off the normal
+        // ladder on purpose) — fall back to its flat DP value
         const target =
-            RARITY_EP_THRESHOLDS[forcedRarity];
+            RARITY_EP_THRESHOLDS[forcedRarity] ?? RARITY_XP[forcedRarity];
 
         if (provisionalXP < target) {
 
@@ -3410,13 +3671,14 @@ function calculateResult(number, forcedRarity = null) {
 
 
     /*
-        Rarer badges land last, right before
-        the overall rarity reveal.
+        Rarer badges land last, right before the
+        overall rarity reveal — godly (secret, off
+        the normal ladder) always lands dead last.
     */
 
     matched.sort((a, b) =>
-        RARITY_ORDER.indexOf(a.rarity) -
-        RARITY_ORDER.indexOf(b.rarity)
+        DISPLAY_RARITIES.indexOf(a.rarity) -
+        DISPLAY_RARITIES.indexOf(b.rarity)
     );
 
 
@@ -3427,7 +3689,9 @@ function calculateResult(number, forcedRarity = null) {
     /*
         Overall rarity comes from the total DP the
         roll earned (see rarityFromXP), floored by
-        digit count (see GLITCH_RARITY_FLOOR) — and
+        digit count (see GLITCH_RARITY_FLOOR). A
+        roll that's exactly the two-digit number 69
+        auto-upgrades to the secret GODLY tier — and
         an admin-forced rarity always wins outright.
     */
 
@@ -3438,6 +3702,12 @@ function calculateResult(number, forcedRarity = null) {
 
         overallRarity =
             maxRarity(overallRarity, GLITCH_RARITY_FLOOR[digits.length]);
+
+    }
+
+    if (digits.length === 2 && number === 69) {
+
+        overallRarity = "godly";
 
     }
 
@@ -3759,7 +4029,7 @@ function hideRarity() {
 
     rarityBox.classList.remove("rarity-show");
 
-    RARITY_ORDER.forEach(r => {
+    DISPLAY_RARITIES.forEach(r => {
         rarityBox.classList.remove(`rarity-${r}`);
         resultNumber.classList.remove(`result-${r}`);
     });
@@ -3768,7 +4038,7 @@ function hideRarity() {
 
 function showRarity(rarity) {
 
-    RARITY_ORDER.forEach(r => {
+    DISPLAY_RARITIES.forEach(r => {
         rarityBox.classList.remove(`rarity-${r}`);
         resultNumber.classList.remove(`result-${r}`);
     });
@@ -3787,8 +4057,18 @@ function showRarity(rarity) {
     const pct =
         (Math.random() * (hi - lo) + lo);
 
+    let pctText;
+
+    if (pct < 0.01) {
+        pctText = pct.toFixed(4);
+    } else if (pct < 1) {
+        pctText = pct.toFixed(1);
+    } else {
+        pctText = Math.round(pct);
+    }
+
     topPercentEl.textContent =
-        `TOP ${pct < 1 ? pct.toFixed(1) : Math.round(pct)}%`;
+        `TOP ${pctText}%`;
 
 
     rarityBox.classList.add("rarity-show");
@@ -4095,6 +4375,10 @@ document.addEventListener("keydown", (e) => {
             closeAdminModal();
         }
 
+        if (changelogOverlay.classList.contains("show")) {
+            closeChangelog();
+        }
+
         return;
 
     }
@@ -4323,6 +4607,44 @@ disclaimerOverlay.addEventListener("click", (e) => {
 });
 
 disclaimerOverlay.classList.add("show");
+
+
+/* =====================================================
+   CHANGELOG
+===================================================== */
+
+const changelogButton =
+    document.getElementById("changelogButton");
+
+const changelogOverlay =
+    document.getElementById("changelogOverlay");
+
+const changelogClose =
+    document.getElementById("changelogClose");
+
+function openChangelog() {
+
+    changelogOverlay.classList.add("show");
+
+}
+
+function closeChangelog() {
+
+    changelogOverlay.classList.remove("show");
+
+}
+
+changelogButton.addEventListener("click", openChangelog);
+
+changelogClose.addEventListener("click", closeChangelog);
+
+changelogOverlay.addEventListener("click", (e) => {
+
+    if (e.target === changelogOverlay) {
+        closeChangelog();
+    }
+
+});
 
 
 /* =====================================================
