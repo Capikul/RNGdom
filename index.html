@@ -1908,7 +1908,7 @@
                 <button class="admin-option" data-rarity="rare" style="color:var(--rare)">RARE</button>
                 <button class="admin-option" data-rarity="legendary" style="color:var(--legendary)">LEGENDARY</button>
                 <button class="admin-option" data-rarity="mythical" style="color:var(--mythical)">MYTHICAL</button>
-                <button class="admin-option" data-rarity="godly" style="color:var(--godly)" title="Secret tier — normally only reachable by rolling exactly 69">GODLY 🔒</button>
+                <button class="admin-option" data-rarity="godly" style="color:var(--godly)" title="Secret tier — normally only reachable by rolling exactly 69, or a 1-digit glitch">GODLY 🔒</button>
 
             </div>
 
@@ -1955,7 +1955,10 @@
         <ul class="changelog-list">
             <li>Reworked the DP thresholds for overall rarity: Common 0-5K, Uncommon 5K-17.5K, Rare 17.5K-40K, Legendary 40K-100K, Mythical 100K+.</li>
             <li>Added 100 new badges inspired by the periodic table — one for each element from Hydrogen to Fermium, earned only when a glitch roll lands on that exact atomic number.</li>
+            <li>Added 75+ lower-digit badges for 1-3 digit glitch rolls, covering number bands, digit sums, and short-roll patterns.</li>
             <li>The Admin Panel is now password protected.</li>
+            <li>Short glitch rolls now guarantee a strictly higher rarity floor the fewer digits they come up with.</li>
+            <li>Fixed a bug where a short glitch roll's displayed DP total could sit below the threshold of the rarity tier it was actually locked into.</li>
         </ul>
 
         <div class="changelog-version">
@@ -2095,8 +2098,9 @@ const RARITY_TOP_RANGE = {
     ladder (rarityFromXP can never produce it) and it's
     left out of the public rarity guide in the info
     modal on purpose — the only ways to see it are
-    rolling exactly 69, or forcing it from the admin
-    panel. DISPLAY_RARITIES is only for cosmetic
+    rolling exactly 69, glitching all the way down to a
+    single digit, or forcing it from the admin panel.
+    DISPLAY_RARITIES is only for cosmetic
     bookkeeping (clearing/sorting classes) that does
     need to know it exists.
 */
@@ -2347,7 +2351,7 @@ function getNextNumber() {
 
 /* =====================================================
    BADGE LIBRARY
-   ~285 badge definitions across 6 rarity tiers.
+   ~360 badge definitions across 6 rarity tiers.
    Each badge has: id, name, icon, rarity, xp,
    description, test(digits, str, number), and an
    optional highlight(digits) returning true/false
@@ -3013,6 +3017,22 @@ badges.push(
         xp: RARITY_XP.godly,
         description: "SECRET: THE ENTIRE ROLL WAS EXACTLY 69. NICE.",
         test: (digits, str, number) => digits.length === 2 && number === 69,
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        /*
+            SECRET. The other way in: the glitch rolled
+            all the way down to a single digit. This is
+            the rarest length in GLITCH_LENGTH_WEIGHTS,
+            so it's a fitting second door into GODLY.
+        */
+        id: "godly-1digit",
+        name: "GODLY",
+        icon: "👑",
+        rarity: "godly",
+        xp: RARITY_XP.godly,
+        description: "SECRET: THE GLITCH ROLLED ALL THE WAY DOWN TO A SINGLE DIGIT.",
+        test: (digits) => digits.length === 1,
         highlight: (digits) => digits.map(() => true)
     },
 
@@ -3763,7 +3783,265 @@ badges.push(
         description: "EVERY DIGIT IS EITHER A 7 OR AN 8.",
         test: (digits) => digits.length >= 3 && digits.every(d => d === 7 || d === 8),
         highlight: (digits) => digits.map(() => true)
+    },
+
+    /* --- LOWER DIGIT BADGES: 1-3 digit rolls only --- */
+
+    {
+        id: "lower-1-digit",
+        name: "TINY ROLL",
+        icon: "🔹",
+        rarity: "common",
+        xp: RARITY_XP.common,
+        description: "ROLL EXACTLY 1 DIGIT.",
+        test: (digits) => digits.length === 1,
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "lower-2-digits",
+        name: "DOUBLE DIGIT",
+        icon: "🔸",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "ROLL EXACTLY 2 DIGITS.",
+        test: (digits) => digits.length === 2,
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "lower-3-digits",
+        name: "TRIPLE DIGIT",
+        icon: "🔶",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "ROLL EXACTLY 3 DIGITS.",
+        test: (digits) => digits.length === 3,
+        highlight: (digits) => digits.map(() => true)
+    },
+
+    /* Ten 0-9 bands, only for short rolls. */
+    ...Array.from({ length: 10 }, (_, d) => ({
+        id: `lower-band-${d}`,
+        name: `LOW ${d}S`,
+        icon: "📍",
+        rarity: d < 3 ? "trash" : d < 6 ? "common" : "uncommon",
+        xp: RARITY_XP[d < 3 ? "trash" : d < 6 ? "common" : "uncommon"],
+        description: `A 1-3 DIGIT ROLL FROM ${d * 10} TO ${d * 10 + 9}.`,
+        test: (digits, str, number) =>
+            digits.length < 4 && number >= d * 10 && number <= d * 10 + 9
+    })),
+
+    /* Nineteen useful number bands: teens, tens, and hundreds. */
+    ...Array.from({ length: 9 }, (_, i) => {
+        const lo = 10 + i * 10;
+        const hi = lo + 9;
+        return {
+            id: `lower-teens-band-${lo}`,
+            name: `${lo}s CLUB`,
+            icon: "🎟️",
+            rarity: i < 3 ? "common" : i < 6 ? "uncommon" : "rare",
+            xp: RARITY_XP[i < 3 ? "common" : i < 6 ? "uncommon" : "rare"],
+            description: `THE SHORT ROLL LANDS BETWEEN ${lo} AND ${hi}.`,
+            test: (digits, str, number) => digits.length === 2 && number >= lo && number <= hi
+        };
+    }),
+    ...Array.from({ length: 9 }, (_, i) => {
+        const lo = 100 + i * 100;
+        const hi = lo + 99;
+        return {
+            id: `lower-hundred-band-${lo}`,
+            name: `${lo}-${hi} ZONE`,
+            icon: "🗺️",
+            rarity: i < 3 ? "common" : i < 6 ? "uncommon" : "rare",
+            xp: RARITY_XP[i < 3 ? "common" : i < 6 ? "uncommon" : "rare"],
+            description: `THE 3-DIGIT ROLL LANDS BETWEEN ${lo} AND ${hi}.`,
+            test: (digits, str, number) => digits.length === 3 && number >= lo && number <= hi
+        };
+    }),
+
+    /* Digit-sum badges for every possible 1-3 digit sum. */
+    ...Array.from({ length: 28 }, (_, sum) => ({
+        id: `lower-digit-sum-${sum}`,
+        name: `SUM ${sum}`,
+        icon: "🧮",
+        rarity: sum >= 20 ? "rare" : sum >= 12 ? "uncommon" : "common",
+        xp: RARITY_XP[sum >= 20 ? "rare" : sum >= 12 ? "uncommon" : "common"],
+        description: `THE DIGITS OF A SHORT ROLL ADD UP TO ${sum}.`,
+        test: (digits) =>
+            digits.length < 4 &&
+            digits.reduce((a, b) => a + b, 0) === sum
+    })),
+
+    /* Pattern badges that are meaningful specifically because the roll is short. */
+    {
+        id: "lower-all-even",
+        name: "SHORT & EVEN",
+        icon: "🟦",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "A 1-3 DIGIT ROLL MADE ENTIRELY OF EVEN DIGITS.",
+        test: (digits) => digits.length < 4 && digits.every(d => d % 2 === 0),
+        highlight: (digits) => digits.map(d => d % 2 === 0)
+    },
+    {
+        id: "lower-all-odd",
+        name: "SHORT & ODD",
+        icon: "🟧",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "A 1-3 DIGIT ROLL MADE ENTIRELY OF ODD DIGITS.",
+        test: (digits) => digits.length < 4 && digits.every(d => d % 2 === 1),
+        highlight: (digits) => digits.map(d => d % 2 === 1)
+    },
+    {
+        id: "lower-unique-digits",
+        name: "NO DUPES",
+        icon: "🧩",
+        rarity: "common",
+        xp: RARITY_XP.common,
+        description: "EVERY DIGIT IN THE SHORT ROLL IS DIFFERENT.",
+        test: (digits) => digits.length < 4 && new Set(digits).size === digits.length
+    },
+    {
+        id: "lower-repeat",
+        name: "REPEAT OFFENDER",
+        icon: "🔁",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "A SHORT ROLL REPEATS AT LEAST ONE DIGIT.",
+        test: (digits) => digits.length < 4 && new Set(digits).size < digits.length,
+        highlight: (digits) => digits.map((d, i) => digits.indexOf(d) !== i)
+    },
+    {
+        id: "lower-palindrome",
+        name: "MINI MIRROR",
+        icon: "🪞",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "THE SHORT ROLL READS THE SAME BACKWARDS.",
+        test: (digits) => digits.length < 4 && digits.join("") === [...digits].reverse().join(""),
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "lower-ascending",
+        name: "UP THE LADDER",
+        icon: "📈",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "EVERY DIGIT IS STRICTLY LARGER THAN THE ONE BEFORE IT.",
+        test: (digits) =>
+            digits.length < 4 &&
+            digits.length > 1 &&
+            digits.every((d, i) => i === 0 || d > digits[i - 1]),
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "lower-descending",
+        name: "DOWN THE LADDER",
+        icon: "📉",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "EVERY DIGIT IS STRICTLY SMALLER THAN THE ONE BEFORE IT.",
+        test: (digits) =>
+            digits.length < 4 &&
+            digits.length > 1 &&
+            digits.every((d, i) => i === 0 || d < digits[i - 1]),
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "lower-double",
+        name: "DOUBLE TROUBLE",
+        icon: "👯",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "A SHORT ROLL CONTAINS TWO OF THE SAME DIGIT.",
+        test: (digits) => digits.length < 4 && Object.values(digitCounts(digits)).some(c => c >= 2)
+    },
+    {
+        id: "lower-triple",
+        name: "TRIPLE THREAT",
+        icon: "🎰",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "ALL THREE DIGITS ARE THE SAME.",
+        test: (digits) => digits.length === 3 && new Set(digits).size === 1,
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "lower-round-ten",
+        name: "CLEAN TEN",
+        icon: "🔟",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "A 2- OR 3-DIGIT SHORT ROLL ENDS IN ZERO.",
+        test: (digits, str, number) => digits.length >= 2 && digits.length < 4 && number % 10 === 0
+    },
+    {
+        id: "lower-round-hundred",
+        name: "CLEAN HUNDRED",
+        icon: "💯",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "A 3-DIGIT SHORT ROLL ENDS IN TWO ZEROES.",
+        test: (digits, str, number) => digits.length === 3 && number % 100 === 0
+    },
+    {
+        id: "lower-seven",
+        name: "LUCKY SEVEN",
+        icon: "🍀",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "A SHORT ROLL CONTAINS A 7.",
+        test: (digits) => digits.length < 4 && digits.includes(7),
+        highlight: (digits) => digits.map(d => d === 7)
+    },
+    {
+        id: "lower-zero",
+        name: "ZERO SIGHTING",
+        icon: "⭕",
+        rarity: "common",
+        xp: RARITY_XP.common,
+        description: "A SHORT ROLL CONTAINS A ZERO.",
+        test: (digits) => digits.length < 4 && digits.includes(0),
+        highlight: (digits) => digits.map(d => d === 0)
+    },
+    {
+        id: "lower-prime",
+        name: "MINI PRIME",
+        icon: "🧪",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "THE SHORT ROLL ITSELF IS PRIME.",
+        test: (digits, str, number) => digits.length < 4 && isPrime(number),
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "lower-square",
+        name: "MINI SQUARE",
+        icon: "◼️",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "THE SHORT ROLL IS A PERFECT SQUARE.",
+        test: (digits, str, number) => digits.length < 4 && isPerfectSquare(number)
+    },
+    {
+        id: "lower-cube",
+        name: "MINI CUBE",
+        icon: "🧊",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "THE SHORT ROLL IS A PERFECT CUBE.",
+        test: (digits, str, number) => digits.length < 4 && isPerfectCube(number)
+    },
+    {
+        id: "lower-triangular",
+        name: "MINI TRIANGLE",
+        icon: "🔺",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "THE SHORT ROLL IS A TRIANGULAR NUMBER.",
+        test: (digits, str, number) => digits.length < 4 && isTriangular(number)
     }
+
 
 );
 
@@ -3845,6 +4123,40 @@ function calculateResult(number, forcedRarity = null) {
             highlight: () => digits.map(() => true)
         });
 
+        /*
+            The digit-count floor guarantees the overall
+            result is AT LEAST `glitchRarity`, no matter how
+            much DP was actually earned. Without this, that
+            could leave the displayed DP total sitting below
+            that tier's own threshold — e.g. a 3-digit roll
+            showing "LEGENDARY" with a DP total under the
+            legendary threshold, even though the roll is
+            genuinely locked into that tier. Top the DP up
+            with a bridging badge so the number shown always
+            matches the tier being displayed.
+        */
+
+        const flooredTarget =
+            RARITY_EP_THRESHOLDS[glitchRarity];
+
+        const provisionalXP =
+            matched.reduce((sum, b) => sum + b.xp, 0);
+
+        if (flooredTarget != null && provisionalXP < flooredTarget) {
+
+            matched.push({
+                id: "glitch-floor-bridge",
+                name: "SHORT ROLL BONUS",
+                icon: "🌀",
+                rarity: glitchRarity,
+                xp: flooredTarget - provisionalXP,
+                description:
+                    `TOPPED UP TO MATCH THE ${glitchRarity.toUpperCase()} DP FLOOR EARNED BY THIS SHORT ROLL.`,
+                highlight: () => digits.map(() => true)
+            });
+
+        }
+
     }
 
 
@@ -3901,10 +4213,11 @@ function calculateResult(number, forcedRarity = null) {
     /*
         Overall rarity comes from the total DP the
         roll earned (see rarityFromXP), floored by
-        digit count (see GLITCH_RARITY_FLOOR). A
-        roll that's exactly the two-digit number 69
-        auto-upgrades to the secret GODLY tier — and
-        an admin-forced rarity always wins outright.
+        digit count (see GLITCH_RARITY_FLOOR). A roll
+        that's exactly the two-digit number 69, or one
+        that glitches all the way down to a single
+        digit, auto-upgrades to the secret GODLY tier —
+        and an admin-forced rarity always wins outright.
     */
 
     let overallRarity =
@@ -3918,6 +4231,12 @@ function calculateResult(number, forcedRarity = null) {
     }
 
     if (digits.length === 2 && number === 69) {
+
+        overallRarity = "godly";
+
+    }
+
+    if (digits.length === 1) {
 
         overallRarity = "godly";
 
@@ -4540,7 +4859,7 @@ function buildInfoText() {
 
     infoGlitch.textContent =
         `About a ${glitchPct}% chance per roll to come up short a few digits instead of six ` +
-        `— the fewer digits, the rarer, and rolling only 1-2 digits is an automatic Mythical.`;
+        `— the fewer digits, the rarer, and rolling down to just 2 digits is an automatic Mythical.`;
 
 }
 
@@ -4746,8 +5065,14 @@ function updateAdminNote() {
             : "whatever rarity that earns";
 
     const floorNote =
-        adminForcedDigits && adminForcedDigits < 6 && !adminForcedRarity
-            ? ` (automatically floored at ${GLITCH_RARITY_FLOOR[adminForcedDigits].toUpperCase()} or higher)`
+        adminForcedDigits && !adminForcedRarity
+            ? (
+                adminForcedDigits === 1
+                    ? " (a 1-digit roll always comes out GODLY)"
+                    : adminForcedDigits < 6
+                        ? ` (automatically floored at ${GLITCH_RARITY_FLOOR[adminForcedDigits].toUpperCase()} or higher)`
+                        : ""
+            )
             : "";
 
     adminNote.textContent =
