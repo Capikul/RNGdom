@@ -492,10 +492,29 @@
         width: 20px;
 
         text-align: center;
+
+        overflow: hidden;
+
+        transition:
+            width 0.4s ease,
+            opacity 0.4s ease,
+            transform 0.4s ease,
+            margin 0.4s ease;
     }
 
     .result-digit.locked {
         animation: digitLock 0.25s ease-out;
+    }
+
+    /*
+        A glitch roll always spins all 6 slots first
+        for suspense, then sheds the ones it doesn't
+        need — those get this class and collapse away.
+    */
+    .result-digit.dropping {
+        width: 0;
+        opacity: 0;
+        transform: scale(0.4);
     }
 
     @keyframes digitLock {
@@ -691,6 +710,14 @@
         text-align: left;
     }
 
+    .badge-spotlight {
+        margin-top: 14px;
+    }
+
+    .badge-spotlight:not(:empty) {
+        margin-bottom: 10px;
+    }
+
     .badge {
         position: relative;
 
@@ -759,6 +786,22 @@
 
         to {
             left: 160%;
+        }
+    }
+
+    .badge.spotlight {
+        box-shadow: 0 0 18px rgba(255, 255, 255, 0.1);
+
+        animation: spotlightPulse 1.1s ease-in-out infinite;
+    }
+
+    @keyframes spotlightPulse {
+        0%, 100% {
+            box-shadow: 0 0 16px rgba(255, 255, 255, 0.08);
+        }
+
+        50% {
+            box-shadow: 0 0 28px rgba(255, 255, 255, 0.2);
         }
     }
 
@@ -1025,6 +1068,14 @@
         margin-top: 8px;
     }
 
+    .info-modal a {
+        color: #b929ff;
+
+        font-weight: 700;
+
+        text-decoration: underline;
+    }
+
     .rarity-guide-row {
         display: flex;
 
@@ -1066,6 +1117,97 @@
         color: var(--muted);
 
         font-size: 11px;
+    }
+
+    /* =========================================
+       ADMIN PANEL
+    ========================================= */
+
+    .admin-options {
+        display: flex;
+        flex-wrap: wrap;
+
+        gap: 6px;
+    }
+
+    .admin-option {
+        padding: 6px 12px;
+
+        border: 1px solid var(--border);
+        border-radius: 6px;
+
+        background: var(--panel-hover);
+
+        color: var(--muted);
+
+        font-size: 11px;
+        font-weight: 800;
+
+        cursor: pointer;
+
+        transition:
+            background 0.15s ease,
+            border-color 0.15s ease,
+            color 0.15s ease,
+            transform 0.15s ease;
+    }
+
+    .admin-option:hover {
+        transform: translateY(-1px);
+
+        border-color: #6a6772;
+    }
+
+    .admin-option.active {
+        background: rgba(255, 255, 255, 0.1);
+
+        border-color: currentColor;
+
+        color: var(--text);
+    }
+
+    #adminNote {
+        margin-top: 14px;
+
+        color: var(--muted);
+
+        font-size: 11px;
+
+        font-style: italic;
+    }
+
+    .admin-actions {
+        margin-top: 16px;
+    }
+
+    .admin-roll-btn {
+        width: 100%;
+
+        padding: 12px;
+
+        border: 1px solid #7a2f76;
+        border-radius: 8px;
+
+        background: #2a2430;
+
+        color: #e48ae0;
+
+        font-size: 14px;
+        font-weight: 900;
+
+        letter-spacing: 1px;
+
+        cursor: pointer;
+
+        transition:
+            background 0.15s ease,
+            transform 0.15s ease;
+    }
+
+    .admin-roll-btn:hover {
+        background: #362e3d;
+
+        transform: translateY(-1px);
     }
 
     /* =========================================
@@ -1305,18 +1447,22 @@
                 class="result-xp"
                 id="rollXP"
             >
-                0 EP
+                0 DP
             </span>
         </div>
 
 
         <div class="total-xp" id="totalXP">
-            0 EP
+            0 DP
         </div>
 
 
         <div class="lifetime">
-            YOUR LIFETIME EP
+            THIS SESSION'S DP
+        </div>
+
+        <div class="lifetime" id="spinCount">
+            0 SPINS THIS SESSION
         </div>
 
 
@@ -1345,6 +1491,8 @@
             0 BADGES EARNED
         </div>
 
+
+        <div class="badge-spotlight" id="badgeSpotlight"></div>
 
         <div class="badges" id="badges"></div>
 
@@ -1376,8 +1524,13 @@
         <p>
             Hit GENERATE to roll a random number. Every pattern it matches
             (contains a digit, is prime, is a palindrome, and dozens more)
-            earns you a badge and some EP. Roll as many times as you want —
+            earns you a badge and some DP. Roll as many times as you want —
             there's no daily limit, so see how lucky you get.
+        </p>
+
+        <p>
+            <strong>DP stands for Digit Points</strong> — the currency you
+            earn from badges, and what your overall rarity is based on.
         </p>
 
         <p id="infoBadgeCount"></p>
@@ -1388,7 +1541,7 @@
 
         <p>
             Your overall rarity isn't just your single best badge — it's
-            based on the total EP every badge you earned adds up to.
+            based on the total DP every badge you earned adds up to.
         </p>
 
         <div id="rarityGuideList"></div>
@@ -1398,6 +1551,113 @@
         </div>
 
         <p id="infoGlitch"></p>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     FAN GAME DISCLAIMER
+========================================= -->
+
+<div class="modal-overlay" id="disclaimerOverlay">
+
+    <div class="info-modal">
+
+        <div class="info-modal-header">
+
+            <span class="info-modal-title">
+                FAN-MADE PROJECT
+            </span>
+
+            <button class="info-modal-close" id="disclaimerClose" aria-label="Close">
+                ✕
+            </button>
+
+        </div>
+
+        <p>
+            RNGdom is an unofficial fan game, not affiliated with or
+            endorsed by the original.
+        </p>
+
+        <p>
+            If you haven't already, go check out the original game at
+            <a href="https://RNGdle.com" target="_blank" rel="noopener noreferrer">RNGdle.com</a>.
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     ADMIN PANEL (press ` to open)
+========================================= -->
+
+<div class="modal-overlay" id="adminOverlay">
+
+    <div class="info-modal">
+
+        <div class="info-modal-header">
+
+            <span class="info-modal-title">
+                ⚙ ADMIN PANEL
+            </span>
+
+            <button class="info-modal-close" id="adminClose" aria-label="Close">
+                ✕
+            </button>
+
+        </div>
+
+        <p>
+            Force the outcome of your next roll, then hit
+            <strong>FORCE ROLL</strong>. Press <strong>`</strong> anytime to
+            reopen this panel. Overrides are one-shot — they reset back to
+            random right after the roll they're used on.
+        </p>
+
+        <div class="info-section-title">
+            DIGIT COUNT
+        </div>
+
+        <div class="admin-options" id="adminDigitOptions">
+
+            <button class="admin-option active" data-digits="random">RANDOM</button>
+            <button class="admin-option" data-digits="6">6</button>
+            <button class="admin-option" data-digits="5">5</button>
+            <button class="admin-option" data-digits="4">4</button>
+            <button class="admin-option" data-digits="3">3</button>
+            <button class="admin-option" data-digits="2">2</button>
+            <button class="admin-option" data-digits="1">1</button>
+
+        </div>
+
+        <div class="info-section-title">
+            OVERALL RARITY
+        </div>
+
+        <div class="admin-options" id="adminRarityOptions">
+
+            <button class="admin-option active" data-rarity="random">RANDOM</button>
+            <button class="admin-option" data-rarity="trash" style="color:var(--trash)">TRASH</button>
+            <button class="admin-option" data-rarity="common" style="color:var(--common)">COMMON</button>
+            <button class="admin-option" data-rarity="uncommon" style="color:var(--uncommon)">UNCOMMON</button>
+            <button class="admin-option" data-rarity="rare" style="color:var(--rare)">RARE</button>
+            <button class="admin-option" data-rarity="legendary" style="color:var(--legendary)">LEGENDARY</button>
+            <button class="admin-option" data-rarity="mythical" style="color:var(--mythical)">MYTHICAL</button>
+
+        </div>
+
+        <p id="adminNote"></p>
+
+        <div class="admin-actions">
+            <button class="admin-roll-btn" id="adminRollBtn">
+                ⚡ FORCE ROLL
+            </button>
+        </div>
 
     </div>
 
@@ -1436,8 +1696,14 @@ const totalXPEl =
 const badgesContainer =
     document.getElementById("badges");
 
+const badgeSpotlight =
+    document.getElementById("badgeSpotlight");
+
 const badgeCountEl =
     document.getElementById("badgeCount");
+
+const spinCountEl =
+    document.getElementById("spinCount");
 
 const rarityBox =
     document.getElementById("rarityBox");
@@ -1457,12 +1723,12 @@ const RARITY_ORDER =
     ["trash", "common", "uncommon", "rare", "legendary", "mythical"];
 
 const RARITY_XP = {
-    trash: 30,
-    common: 140,
-    uncommon: 360,
-    rare: 900,
-    legendary: 2400,
-    mythical: 7000
+    trash: 50,
+    common: 250,
+    uncommon: 650,
+    rare: 1600,
+    legendary: 4200,
+    mythical: 12000
 };
 
 const RARITY_TOP_RANGE = {
@@ -1475,13 +1741,13 @@ const RARITY_TOP_RANGE = {
 };
 
 /*
-    Overall rarity is based on how much total EP
+    Overall rarity is based on how much total DP
     the roll earned — not your single best badge,
     and not a separate badge-weight score. Just:
     the more you racked up together, the rarer the
     overall result.
 
-    Pushed much harder now — 6,000 EP lands you at
+    Pushed much harder now — 6,000 DP lands you at
     "uncommon", not much higher. Reaching rare+ means
     stacking multiple rare/legendary-tier badges in a
     single roll, and mythical (outside the 1-2 digit
@@ -1490,11 +1756,11 @@ const RARITY_TOP_RANGE = {
 
 const RARITY_EP_THRESHOLDS = {
     trash: 0,
-    common: 1500,
-    uncommon: 6000,
-    rare: 20000,
-    legendary: 60000,
-    mythical: 150000
+    common: 2000,
+    uncommon: 8000,
+    rare: 26000,
+    legendary: 80000,
+    mythical: 200000
 };
 
 function rarityFromXP(totalXP) {
@@ -1513,7 +1779,31 @@ function rarityFromXP(totalXP) {
 
 }
 
+/*
+    Returns whichever of the two rarities ranks
+    higher in RARITY_ORDER. Used to enforce the
+    "fewer digits = at least this rare" floor,
+    and to fold an admin-forced rarity in cleanly.
+*/
+function maxRarity(a, b) {
+
+    return RARITY_ORDER.indexOf(a) >= RARITY_ORDER.indexOf(b)
+        ? a
+        : b;
+
+}
+
 let lifetimeEP = 0;
+let sessionSpins = 0;
+
+function bumpSpinCount() {
+
+    sessionSpins++;
+
+    spinCountEl.textContent =
+        `${sessionSpins.toLocaleString()} SPIN${sessionSpins === 1 ? "" : "S"} THIS SESSION`;
+
+}
 
 
 /* =====================================================
@@ -1592,14 +1882,14 @@ function uniqueCount(digits) {
    landing on 1-2 digits is extremely unlikely overall.
 ===================================================== */
 
-const GLITCH_CHANCE = 0.015;
+const GLITCH_CHANCE = 0.025;
 
 const GLITCH_LENGTH_WEIGHTS = [
-    { length: 5, weight: 45 },
-    { length: 4, weight: 28 },
-    { length: 3, weight: 16 },
-    { length: 2, weight: 8 },
-    { length: 1, weight: 3 }
+    { length: 5, weight: 40 },
+    { length: 4, weight: 26 },
+    { length: 3, weight: 17 },
+    { length: 2, weight: 11 },
+    { length: 1, weight: 6 }
 ];
 
 function pickGlitchLength() {
@@ -1627,10 +1917,7 @@ function rollNumber() {
 
         const length = pickGlitchLength();
 
-        const min = length === 1 ? 0 : Math.pow(10, length - 1);
-        const max = Math.pow(10, length) - 1;
-
-        return Math.floor(min + Math.random() * (max - min + 1));
+        return numberOfLength(length);
 
     }
 
@@ -1638,10 +1925,54 @@ function rollNumber() {
 
 }
 
+function numberOfLength(length) {
+
+    const min = length === 1 ? 0 : Math.pow(10, length - 1);
+    const max = Math.pow(10, length) - 1;
+
+    return Math.floor(min + Math.random() * (max - min + 1));
+
+}
+
+/*
+    The fewer digits a roll comes up with, the higher
+    the guaranteed minimum overall rarity — regardless
+    of how much DP the matched badges add up to. 1-2
+    digits is always Mythical; 3 is always at least
+    Legendary; and so on.
+*/
+const GLITCH_RARITY_FLOOR = {
+    5: "uncommon",
+    4: "rare",
+    3: "legendary",
+    2: "mythical",
+    1: "mythical"
+};
+
+/*
+    ADMIN PANEL OVERRIDES
+
+    null means "let it roll normally". Set by the
+    admin panel (opened with the ` key) so testers
+    can force any digit count or rarity on demand.
+*/
+let adminForcedDigits = null;
+let adminForcedRarity = null;
+
+function getNextNumber() {
+
+    if (adminForcedDigits) {
+        return numberOfLength(adminForcedDigits);
+    }
+
+    return rollNumber();
+
+}
+
 
 /* =====================================================
    BADGE LIBRARY
-   ~155 badge definitions across 6 rarity tiers.
+   ~185 badge definitions across 6 rarity tiers.
    Each badge has: id, name, icon, rarity, xp,
    description, test(digits, str, number), and an
    optional highlight(digits) returning true/false
@@ -2590,6 +2921,377 @@ badges.push(
             return false;
         },
         highlight: (digits) => digits.map(() => true)
+    },
+
+    /* --- third batch: mostly uncommon+ to balance the tiers --- */
+
+    {
+        id: "framed",
+        name: "FRAMED",
+        icon: "🖼️",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "THE FIRST AND LAST DIGIT MATCH, BUT NOTHING IN THE MIDDLE REPEATS.",
+        test: (digits) =>
+            digits.length === 6 &&
+            digits[0] === digits[5] &&
+            new Set(digits.slice(1, 5)).size === 4,
+        highlight: (digits) => digits.map((d, i) => i === 0 || i === 5)
+    },
+    {
+        id: "teen-sum",
+        name: "TEEN SUM",
+        icon: "🔟",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "THE DIGITS ADD UP TO SOMEWHERE BETWEEN 13 AND 19.",
+        test: (digits) => {
+            const sum = digits.reduce((a, b) => a + b, 0);
+            return sum >= 13 && sum <= 19;
+        }
+    },
+    {
+        id: "scattered",
+        name: "SCATTERED",
+        icon: "🌫️",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "NO TWO DIGITS IN THE NUMBER ARE NEXT-DOOR NEIGHBORS IN VALUE.",
+        test: (digits) => {
+            for (let i = 0; i < digits.length; i++) {
+                for (let j = i + 1; j < digits.length; j++) {
+                    if (Math.abs(digits[i] - digits[j]) === 1) return false;
+                }
+            }
+            return true;
+        }
+    },
+    {
+        id: "half-prime",
+        name: "HALF PRIME",
+        icon: "➗",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "EXACTLY THREE OF THE DIGITS ARE PRIME NUMBERS (2, 3, 5, OR 7).",
+        test: (digits) =>
+            digits.length === 6 &&
+            digits.filter(d => [2, 3, 5, 7].includes(d)).length === 3
+    },
+    {
+        id: "double-double",
+        name: "DOUBLE DOUBLE",
+        icon: "🎭",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "CONTAINS TWO SEPARATE BACK-TO-BACK MATCHING PAIRS.",
+        test: (digits) => {
+            let pairs = 0;
+            for (let i = 0; i < digits.length - 1; i++) {
+                if (digits[i] === digits[i + 1]) {
+                    pairs++;
+                    i++;
+                }
+            }
+            return pairs >= 2;
+        }
+    },
+    {
+        id: "prime-position",
+        name: "PRIME POSITION",
+        icon: "📍",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "A PRIME DIGIT SITS IN THE 2ND, 3RD, OR 5TH POSITION.",
+        test: (digits) =>
+            [1, 2, 4].some(i => digits[i] !== undefined && [2, 3, 5, 7].includes(digits[i]))
+    },
+    {
+        id: "echo",
+        name: "ECHO",
+        icon: "📣",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "THE FIRST DIGIT SHOWS UP AGAIN LATER IN THE NUMBER.",
+        test: (digits) => digits.length > 1 && digits.slice(1).includes(digits[0])
+    },
+    {
+        id: "clean-half",
+        name: "CLEAN HALF",
+        icon: "🧼",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "EXACTLY HALF THE DIGITS ARE A ZERO OR A FIVE.",
+        test: (digits) =>
+            digits.length === 6 &&
+            digits.filter(d => d === 0 || d === 5).length === 3
+    },
+    {
+        id: "soft-launch",
+        name: "SOFT LAUNCH",
+        icon: "🚀",
+        rarity: "uncommon",
+        xp: RARITY_XP.uncommon,
+        description: "THE FIRST DIGIT IS THE SMALLEST DIGIT IN THE WHOLE NUMBER.",
+        test: (digits) => digits.length >= 2 && digits[0] === Math.min(...digits)
+    },
+    {
+        id: "fibonacci-digits",
+        name: "FIBONACCI DIGITS",
+        icon: "🐚",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "EVERY DIGIT IS A FIBONACCI NUMBER (0, 1, 2, 3, 5, OR 8).",
+        test: (digits) => digits.every(d => [0, 1, 2, 3, 5, 8].includes(d))
+    },
+    {
+        id: "anti-fibonacci",
+        name: "ANTI-FIBONACCI",
+        icon: "🚫",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "NO DIGIT IS A FIBONACCI NUMBER (0, 1, 2, 3, 5, OR 8).",
+        test: (digits) => digits.every(d => ![0, 1, 2, 3, 5, 8].includes(d))
+    },
+    {
+        id: "square-product",
+        name: "SQUARE PRODUCT",
+        icon: "🟦",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "MULTIPLYING ALL THE DIGITS TOGETHER GIVES A PERFECT SQUARE.",
+        test: (digits) => {
+            if (digits.includes(0)) return false;
+            const product = digits.reduce((a, b) => a * b, 1);
+            return isPerfectSquare(product);
+        }
+    },
+    {
+        id: "cubic-product",
+        name: "CUBIC PRODUCT",
+        icon: "🧊",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "MULTIPLYING ALL THE DIGITS TOGETHER GIVES A PERFECT CUBE.",
+        test: (digits) => {
+            if (digits.includes(0)) return false;
+            const product = digits.reduce((a, b) => a * b, 1);
+            return isPerfectCube(product);
+        }
+    },
+    {
+        id: "three-pairs",
+        name: "THREE PAIRS",
+        icon: "👥",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "THE DIGITS FORM THREE SEPARATE MATCHING PAIRS.",
+        test: (digits) =>
+            digits.length === 6 &&
+            Object.values(digitCounts(digits)).filter(c => c === 2).length === 3
+    },
+    {
+        id: "parity-streak",
+        name: "PARITY STREAK",
+        icon: "🌊",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "FOUR OR MORE DIGITS IN A ROW SHARE THE SAME PARITY.",
+        test: (digits) => {
+            let streak = 1;
+            for (let i = 1; i < digits.length; i++) {
+                if (digits[i] % 2 === digits[i - 1] % 2) {
+                    streak++;
+                    if (streak >= 4) return true;
+                } else {
+                    streak = 1;
+                }
+            }
+            return false;
+        }
+    },
+    {
+        id: "reverse-divides",
+        name: "REVERSE DIVIDES",
+        icon: "🪞",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "THE NUMBER IS EVENLY DIVISIBLE BY ITS OWN REVERSE.",
+        test: (digits, str, number) => {
+            const reversed = Number([...str].reverse().join(""));
+            return reversed > 0 && number !== reversed && number % reversed === 0;
+        }
+    },
+    {
+        id: "multiply-match",
+        name: "MULTIPLY MATCH",
+        icon: "✖️",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "THE FIRST DIGIT TIMES THE LAST DIGIT EQUALS THE SUM OF THE MIDDLE DIGITS.",
+        test: (digits) =>
+            digits.length === 6 &&
+            digits[0] * digits[5] === digits.slice(1, 5).reduce((a, b) => a + b, 0)
+    },
+    {
+        id: "prime-streak",
+        name: "PRIME STREAK",
+        icon: "🔥",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "THREE ADJACENT DIGITS ARE ALL PRIME NUMBERS.",
+        test: (digits) => {
+            for (let i = 0; i <= digits.length - 3; i++) {
+                if ([digits[i], digits[i + 1], digits[i + 2]].every(d => [2, 3, 5, 7].includes(d))) return true;
+            }
+            return false;
+        }
+    },
+    {
+        id: "sandwich-prime",
+        name: "PRIME SANDWICH",
+        icon: "🥪",
+        rarity: "rare",
+        xp: RARITY_XP.rare,
+        description: "THE FIRST AND LAST DIGITS ARE PRIME, BUT NONE OF THE MIDDLE ONES ARE.",
+        test: (digits) =>
+            digits.length === 6 &&
+            [2, 3, 5, 7].includes(digits[0]) &&
+            [2, 3, 5, 7].includes(digits[5]) &&
+            digits.slice(1, 5).every(d => ![2, 3, 5, 7].includes(d))
+    },
+    {
+        id: "mirror-cube",
+        name: "MIRROR CUBE",
+        icon: "🪞",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "THE NUMBER'S REVERSE IS A PERFECT CUBE, BUT THE NUMBER ITSELF ISN'T.",
+        test: (digits, str, number) => {
+            const reversed = Number([...str].reverse().join(""));
+            return isPerfectCube(reversed) && !isPerfectCube(number);
+        }
+    },
+    {
+        id: "prime-triplet",
+        name: "PRIME TRIPLET",
+        icon: "🔱",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "THE NUMBER, ITS REVERSE, AND THEIR SUM ARE ALL PRIME.",
+        test: (digits, str, number) => {
+            const reversed = Number([...str].reverse().join(""));
+            const total = number + reversed;
+            return isPrime(number) && isPrime(reversed) && isPrime(total);
+        }
+    },
+    {
+        id: "factorion-vibes",
+        name: "FACTORION VIBES",
+        icon: "❗",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "THE SUM OF EACH DIGIT'S FACTORIAL EQUALS THE NUMBER OR ITS REVERSE.",
+        test: (digits, str, number) => {
+            const FACT = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880];
+            const sum = digits.reduce((a, d) => a + FACT[d], 0);
+            const reversed = Number([...str].reverse().join(""));
+            return sum === number || sum === reversed;
+        }
+    },
+    {
+        id: "repunit-multiple",
+        name: "REPUNIT MULTIPLE",
+        icon: "1️⃣",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "THE NUMBER IS AN EXACT MULTIPLE OF 111.",
+        test: (digits, str, number) => number > 0 && number % 111 === 0
+    },
+    {
+        id: "balanced-primes",
+        name: "TWIN SPLIT",
+        icon: "⚔️",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "THE FIRST THREE DIGITS FORM A PRIME NUMBER, AND SO DO THE LAST THREE.",
+        test: (digits, str) =>
+            digits.length === 6 &&
+            isPrime(Number(str.slice(0, 3))) &&
+            isPrime(Number(str.slice(3)))
+    },
+    {
+        id: "armstrong-echo",
+        name: "ARMSTRONG ECHO",
+        icon: "🔺",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "THE SUM OF EACH DIGIT CUBED EQUALS THE NUMBER ITSELF.",
+        test: (digits, str, number) => digits.reduce((a, d) => a + d ** 3, 0) === number
+    },
+    {
+        id: "reverse-add-palindrome",
+        name: "REVERSE ADD PALINDROME",
+        icon: "➕",
+        rarity: "legendary",
+        xp: RARITY_XP.legendary,
+        description: "ADDING THE NUMBER TO ITS REVERSE PRODUCES A PALINDROME.",
+        test: (digits, str, number) => {
+            const reversed = Number([...str].reverse().join(""));
+            if (number === reversed) return false;
+            const total = String(number + reversed);
+            return total === [...total].reverse().join("");
+        }
+    },
+    {
+        id: "perfect-storm",
+        name: "PERFECT STORM",
+        icon: "🌪️",
+        rarity: "mythical",
+        xp: RARITY_XP.mythical,
+        description: "A PALINDROME, DIVISIBLE BY 7, AND EVERY DIGIT IS EVEN.",
+        test: (digits, str, number) =>
+            str === [...str].reverse().join("") &&
+            number % 7 === 0 &&
+            digits.every(d => d % 2 === 0),
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "full-house-royale",
+        name: "FULL HOUSE ROYALE",
+        icon: "🎰",
+        rarity: "mythical",
+        xp: RARITY_XP.mythical,
+        description: "ONE DIGIT APPEARS FOUR TIMES AND ANOTHER APPEARS TWICE.",
+        test: (digits) => {
+            if (digits.length !== 6) return false;
+            const counts = Object.values(digitCounts(digits));
+            return counts.includes(4) && counts.includes(2) && counts.length === 2;
+        },
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        id: "triple-mirror",
+        name: "TRIPLE MIRROR",
+        icon: "🪞",
+        rarity: "mythical",
+        xp: RARITY_XP.mythical,
+        description: "THE NUMBER'S DISTANCE FROM ITS OWN REVERSE IS ITSELF A PALINDROME.",
+        test: (digits, str, number) => {
+            const reversedStr = [...str].reverse().join("");
+            if (str === reversedStr) return false;
+            const diffStr = String(Math.abs(number - Number(reversedStr)));
+            return diffStr.length >= 2 && diffStr === [...diffStr].reverse().join("");
+        }
+    },
+    {
+        id: "all-in",
+        name: "ALL IN",
+        icon: "🎲",
+        rarity: "mythical",
+        xp: RARITY_XP.mythical,
+        description: "EVERY DIGIT IS EITHER A 7 OR AN 8.",
+        test: (digits) => digits.length >= 3 && digits.every(d => d === 7 || d === 8),
+        highlight: (digits) => digits.map(() => true)
     }
 
 );
@@ -2599,7 +3301,7 @@ badges.push(
    XP
 ===================================================== */
 
-function calculateResult(number) {
+function calculateResult(number, forcedRarity = null) {
 
     const str = String(number);
 
@@ -2644,34 +3346,65 @@ function calculateResult(number) {
 
     /*
         VERY VERY RARE glitch: the roll can come up
-        short a handful of digits instead of six.
-        The fewer digits, the rarer the badge tier —
-        and 1-2 digits is an automatic Mythical
-        overall result, no matter what else matched.
+        short a handful of digits instead of six. The
+        fewer digits, the rarer the badge tier — and
+        the overall result is floored at that same
+        tier no matter how much DP was actually
+        earned (see GLITCH_RARITY_FLOOR below).
     */
 
     if (digits.length < 6) {
 
-        let glitchRarity;
+        const glitchRarity =
+            GLITCH_RARITY_FLOOR[digits.length];
 
-        if (digits.length <= 2) {
-            glitchRarity = "mythical";
-        } else if (digits.length <= 4) {
-            glitchRarity = "legendary";
-        } else {
-            glitchRarity = "rare";
-        }
+        // extra bonus on top of the tier's base DP —
+        // the fewer digits you got, the bigger the bonus
+        const shortRollBonus =
+            (6 - digits.length) * 5000;
 
         matched.push({
             id: "glitched-roll",
             name: "GLITCH IN THE MATRIX",
             icon: "🌀",
             rarity: glitchRarity,
-            xp: RARITY_XP[glitchRarity],
+            xp: RARITY_XP[glitchRarity] + shortRollBonus,
             description:
                 `THE ROLL GLITCHED, PRODUCING ONLY ${digits.length} DIGIT${digits.length === 1 ? "" : "S"} INSTEAD OF SIX.`,
             highlight: () => digits.map(() => true)
         });
+
+    }
+
+
+    /*
+        Admin panel override: force the overall
+        result up to a specific rarity, topping up
+        the DP with a bridging badge so the numbers
+        stay internally consistent.
+    */
+
+    if (forcedRarity) {
+
+        const provisionalXP =
+            matched.reduce((sum, b) => sum + b.xp, 0);
+
+        const target =
+            RARITY_EP_THRESHOLDS[forcedRarity];
+
+        if (provisionalXP < target) {
+
+            matched.push({
+                id: "admin-override",
+                name: "ADMIN OVERRIDE",
+                icon: "🛠️",
+                rarity: forcedRarity,
+                xp: target - provisionalXP,
+                description: "MANUALLY FORCED FROM THE ADMIN PANEL.",
+                highlight: () => digits.map(() => false)
+            });
+
+        }
 
     }
 
@@ -2692,16 +3425,27 @@ function calculateResult(number) {
 
 
     /*
-        Overall rarity comes from the total EP the
-        roll earned (see rarityFromXP) — except a
-        1-2 digit glitch roll always overrides
-        straight to Mythical.
+        Overall rarity comes from the total DP the
+        roll earned (see rarityFromXP), floored by
+        digit count (see GLITCH_RARITY_FLOOR) — and
+        an admin-forced rarity always wins outright.
     */
 
-    const overallRarity =
-        digits.length <= 2
-            ? "mythical"
-            : rarityFromXP(totalXP);
+    let overallRarity =
+        rarityFromXP(totalXP);
+
+    if (digits.length < 6) {
+
+        overallRarity =
+            maxRarity(overallRarity, GLITCH_RARITY_FLOOR[digits.length]);
+
+    }
+
+    if (forcedRarity) {
+
+        overallRarity = forcedRarity;
+
+    }
 
 
     return { digits, str, matched, totalXP, overallRarity };
@@ -2745,9 +3489,16 @@ function rollAnimation(number) {
         const target =
             String(number);
 
-        createRollingDigits(target.length);
+        /*
+            Always reveal as a full 6-digit spin
+            first — even a glitch roll with fewer
+            digits builds the same suspense before
+            it shows its hand.
+        */
 
-        const digits =
+        createRollingDigits(6);
+
+        const allSlots =
             [...document.querySelectorAll(
                 ".result-digit"
             )];
@@ -2755,81 +3506,123 @@ function rollAnimation(number) {
         resultNumber.classList.add("rolling");
 
 
-        /*
-            Each digit spins independently.
+        allSlots.forEach(slot => {
 
-            Digit 1 stops first.
-            Then digit 2.
-            Then digit 3...
-        */
-
-        digits.forEach((digit, index) => {
-
-            let interval;
-
-            const spinTime =
-                750 +
-                index * (330 + 1000); // each digit now reveals 1s later than the one before it
-
-
-            interval =
+            slot._spinInterval =
                 setInterval(() => {
 
-                    digit.textContent =
+                    slot.textContent =
                         Math.floor(
                             Math.random() * 10
                         );
 
                 }, 55);
 
-
-            setTimeout(() => {
-
-                clearInterval(interval);
-
-                digit.textContent =
-                    target[index];
-
-                digit.classList.add(
-                    "locked"
-                );
+        });
 
 
-                /*
-                    Remove the class so
-                    rerolls can animate again.
-                */
+        /*
+            After a full second of all 6 digits
+            spinning, drop whichever slots this
+            roll doesn't need — smoothly collapsing
+            them away — then stagger-lock the rest.
+        */
+
+        setTimeout(() => {
+
+            const excess =
+                allSlots.length - target.length;
+
+            let keptSlots = allSlots;
+
+            if (excess > 0) {
+
+                const dropSlots =
+                    allSlots.slice(0, excess);
+
+                keptSlots =
+                    allSlots.slice(excess);
+
+                dropSlots.forEach(slot => {
+
+                    clearInterval(slot._spinInterval);
+
+                    slot.classList.add("dropping");
+
+                });
 
                 setTimeout(() => {
 
-                    digit.classList.remove(
+                    dropSlots.forEach(slot => {
+                        slot.remove();
+                    });
+
+                }, 420);
+
+            }
+
+
+            /*
+                Each remaining digit spins a little
+                longer, stopping one after another.
+            */
+
+            keptSlots.forEach((digit, index) => {
+
+                const spinTime =
+                    400 +
+                    index * (330 + 1000); // each digit now reveals 1s later than the one before it
+
+
+                setTimeout(() => {
+
+                    clearInterval(digit._spinInterval);
+
+                    digit.textContent =
+                        target[index];
+
+                    digit.classList.add(
                         "locked"
                     );
 
-                }, 300);
 
-
-                /*
-                    Last digit finished.
-                */
-
-                if (index === digits.length - 1) {
+                    /*
+                        Remove the class so
+                        rerolls can animate again.
+                    */
 
                     setTimeout(() => {
 
-                        resultNumber.classList.remove(
-                            "rolling"
+                        digit.classList.remove(
+                            "locked"
                         );
 
-                        resolve();
+                    }, 300);
 
-                    }, 250);
 
-                }
+                    /*
+                        Last digit finished.
+                    */
 
-            }, spinTime);
+                    if (index === keptSlots.length - 1) {
 
-        });
+                        setTimeout(() => {
+
+                            resultNumber.classList.remove(
+                                "rolling"
+                            );
+
+                            resolve();
+
+                        }, 250);
+
+                    }
+
+                }, spinTime);
+
+            });
+
+        }, 1000);
 
     });
 
@@ -2867,7 +3660,7 @@ function renderBadgeElement(badge, digits) {
             <span class="badge-name">${badge.name}</span>
             <span class="badge-rarity ${badge.rarity}">${badge.rarity.toUpperCase()}</span>
         </div>
-        <span class="badge-xp">+${badge.xp.toLocaleString()} EP</span>
+        <span class="badge-xp">+${badge.xp.toLocaleString()} DP</span>
         <div class="badge-description">${badge.description}</div>
         <div class="digits">${digitsHTML}</div>
     `;
@@ -2880,58 +3673,80 @@ function renderBadgeElement(badge, digits) {
 /* =====================================================
    BADGE ANIMATION
 
-   Badges reveal slowly, one at a time, and this
-   returns a Promise that resolves once the very
-   last badge has finished animating in — so the
-   rarity reveal can wait for it.
+   Badges reveal one at a time in a "spotlight" slot,
+   worst to best (matched is already sorted that way).
+   Each new badge takes over the spotlight, and the
+   one it replaces slides down to join the growing
+   list above the previous badges — so the list ends
+   up with your best badge on top and trash on the
+   bottom, in the order they were earned.
+
+   Returns a Promise that resolves once the very last
+   badge has joined the list — so the rarity reveal
+   can wait for it.
 ===================================================== */
 
 const BADGE_START_DELAY = 300;
-const BADGE_STEP_DELAY = 180;
+const BADGE_STEP_DELAY = 260;
 const BADGE_TRANSITION_MS = 600;
 
-function animateBadges(result) {
+function wait(ms) {
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
 
-        badgesContainer.innerHTML = "";
+}
 
-        const elements =
-            result.matched.map(badge =>
-                renderBadgeElement(badge, result.digits)
-            );
+async function animateBadges(result) {
 
-        elements.forEach(el =>
-            badgesContainer.appendChild(el)
-        );
+    badgesContainer.innerHTML = "";
+    badgeSpotlight.innerHTML = "";
 
-        badgeCountEl.textContent =
-            `${result.matched.length} BADGES EARNED`;
+    badgeCountEl.textContent =
+        `${result.matched.length} BADGES EARNED`;
 
 
-        elements.forEach((el, index) => {
-
-            setTimeout(() => {
-
-                el.classList.add("badge-show");
-
-            }, BADGE_START_DELAY + index * BADGE_STEP_DELAY);
-
-        });
+    await wait(BADGE_START_DELAY);
 
 
-        const totalTime =
-            BADGE_START_DELAY +
-            Math.max(0, elements.length - 1) * BADGE_STEP_DELAY +
-            BADGE_TRANSITION_MS;
+    for (const badge of result.matched) {
 
-        setTimeout(() => {
+        // demote whatever's currently spotlighted down into the list
+        const current = badgeSpotlight.firstElementChild;
 
-            resolve();
+        if (current) {
 
-        }, totalTime);
+            current.classList.remove("spotlight");
+            badgesContainer.insertBefore(current, badgesContainer.firstChild);
 
-    });
+        }
+
+        // bring the next (better) badge into the spotlight
+        const el = renderBadgeElement(badge, result.digits);
+
+        el.classList.add("spotlight");
+
+        badgeSpotlight.appendChild(el);
+
+        await new Promise(resolve => requestAnimationFrame(resolve));
+
+        el.classList.add("badge-show");
+
+        await wait(BADGE_STEP_DELAY);
+
+    }
+
+
+    // let the best badge sit in the spotlight a moment, then join the list too
+    await wait(BADGE_TRANSITION_MS);
+
+    const last = badgeSpotlight.firstElementChild;
+
+    if (last) {
+
+        last.classList.remove("spotlight");
+        badgesContainer.insertBefore(last, badgesContainer.firstChild);
+
+    }
 
 }
 
@@ -2985,25 +3800,43 @@ function showRarity(rarity) {
    SHOW RESULT
 ===================================================== */
 
-async function showResult() {
+async function runRoll(isFirstRoll) {
 
     const number =
-        rollNumber();
+        getNextNumber();
+
+    // admin overrides are one-shot: consume them now,
+    // then reset back to "random" for next time
+    const rarityOverride =
+        adminForcedRarity;
+
+    adminForcedDigits = null;
+    adminForcedRarity = null;
+
+    resetAdminUI();
+
 
     const result =
-        calculateResult(number);
+        calculateResult(number, rarityOverride);
+
+    bumpSpinCount();
 
 
     generateButton.disabled = true;
     rerollButton.disabled = true;
 
 
-    homeScreen.style.display = "none";
-    resultScreen.style.display = "flex";
+    if (isFirstRoll) {
+
+        homeScreen.style.display = "none";
+        resultScreen.style.display = "flex";
+
+    }
 
     hideRarity();
 
     badgesContainer.innerHTML = "";
+    badgeSpotlight.innerHTML = "";
     badgeCountEl.textContent = "0 BADGES EARNED";
 
 
@@ -3017,7 +3850,7 @@ async function showResult() {
 
 
     rollXP.textContent =
-        result.totalXP.toLocaleString() + " EP";
+        result.totalXP.toLocaleString() + " DP";
 
 
     await animateBadges(result);
@@ -3028,7 +3861,7 @@ async function showResult() {
     lifetimeEP += result.totalXP;
 
     totalXPEl.textContent =
-        lifetimeEP.toLocaleString() + " EP";
+        lifetimeEP.toLocaleString() + " DP";
 
 
     generateButton.disabled = false;
@@ -3048,7 +3881,7 @@ generateButton.addEventListener(
         generateButton.textContent =
             "ROLLING...";
 
-        await showResult();
+        await runRoll(true);
 
         generateButton.textContent =
             "GENERATE";
@@ -3069,40 +3902,10 @@ rerollButton.addEventListener(
             return;
         }
 
-
-        rerollButton.disabled = true;
         rerollButton.textContent = "ROLLING...";
 
+        await runRoll(false);
 
-        hideRarity();
-
-
-        const number =
-            rollNumber();
-
-        const result =
-            calculateResult(number);
-
-
-        await rollAnimation(number);
-
-
-        rollXP.textContent =
-            result.totalXP.toLocaleString() + " EP";
-
-
-        await animateBadges(result);
-
-        showRarity(result.overallRarity);
-
-
-        lifetimeEP += result.totalXP;
-
-        totalXPEl.textContent =
-            lifetimeEP.toLocaleString() + " EP";
-
-
-        rerollButton.disabled = false;
         rerollButton.textContent = "↻ REROLL";
 
     }
@@ -3226,7 +4029,7 @@ function buildRarityGuide() {
                     <div class="rarity-guide-row">
                         <span class="rarity-guide-swatch" style="background:var(--${r})"></span>
                         <span class="rarity-guide-name" style="color:var(--${r})">${r.toUpperCase()}</span>
-                        <span class="rarity-guide-detail">${RARITY_EP_THRESHOLDS[r].toLocaleString()}+ EP · ${topLabel}</span>
+                        <span class="rarity-guide-detail">${RARITY_EP_THRESHOLDS[r].toLocaleString()}+ DP · ${topLabel}</span>
                     </div>
                 `;
 
@@ -3278,11 +4081,248 @@ infoOverlay.addEventListener("click", (e) => {
 
 document.addEventListener("keydown", (e) => {
 
-    if (e.key === "Escape" && infoOverlay.classList.contains("show")) {
-        closeInfoModal();
+    if (e.key === "Escape") {
+
+        if (infoOverlay.classList.contains("show")) {
+            closeInfoModal();
+        }
+
+        if (disclaimerOverlay.classList.contains("show")) {
+            closeDisclaimer();
+        }
+
+        if (adminOverlay.classList.contains("show")) {
+            closeAdminModal();
+        }
+
+        return;
+
+    }
+
+    /*
+        The ` key is the "keyboard button" that
+        opens the admin panel — toggles it open
+        or closed, from anywhere in the game.
+    */
+
+    if (e.key === "`") {
+
+        e.preventDefault();
+
+        if (adminOverlay.classList.contains("show")) {
+            closeAdminModal();
+        } else {
+            openAdminModal();
+        }
+
     }
 
 });
+
+
+/* =====================================================
+   ADMIN PANEL
+
+   Opened with the ` key. Lets you force the next
+   roll's digit count and/or overall rarity for
+   testing. Overrides are one-shot: they're read
+   and cleared by runRoll() the moment they're used.
+===================================================== */
+
+const adminOverlay =
+    document.getElementById("adminOverlay");
+
+const adminClose =
+    document.getElementById("adminClose");
+
+const adminDigitOptions =
+    document.getElementById("adminDigitOptions");
+
+const adminRarityOptions =
+    document.getElementById("adminRarityOptions");
+
+const adminRollBtn =
+    document.getElementById("adminRollBtn");
+
+const adminNote =
+    document.getElementById("adminNote");
+
+
+function updateAdminNote() {
+
+    const digitText =
+        adminForcedDigits
+            ? `${adminForcedDigits} digit${adminForcedDigits === 1 ? "" : "s"}`
+            : "a random digit count";
+
+    const rarityText =
+        adminForcedRarity
+            ? adminForcedRarity.toUpperCase()
+            : "whatever rarity that earns";
+
+    const floorNote =
+        adminForcedDigits && adminForcedDigits < 6 && !adminForcedRarity
+            ? ` (automatically floored at ${GLITCH_RARITY_FLOOR[adminForcedDigits].toUpperCase()} or higher)`
+            : "";
+
+    adminNote.textContent =
+        `Next roll: ${digitText}, forced to ${rarityText}${floorNote}.`;
+
+}
+
+function resetAdminUI() {
+
+    adminDigitOptions
+        .querySelectorAll(".admin-option")
+        .forEach(btn => {
+            btn.classList.toggle(
+                "active",
+                btn.dataset.digits === "random"
+            );
+        });
+
+    adminRarityOptions
+        .querySelectorAll(".admin-option")
+        .forEach(btn => {
+            btn.classList.toggle(
+                "active",
+                btn.dataset.rarity === "random"
+            );
+        });
+
+    updateAdminNote();
+
+}
+
+adminDigitOptions.addEventListener("click", (e) => {
+
+    const btn = e.target.closest(".admin-option");
+    if (!btn) return;
+
+    adminDigitOptions
+        .querySelectorAll(".admin-option")
+        .forEach(b => b.classList.remove("active"));
+
+    btn.classList.add("active");
+
+    adminForcedDigits =
+        btn.dataset.digits === "random"
+            ? null
+            : Number(btn.dataset.digits);
+
+    updateAdminNote();
+
+});
+
+adminRarityOptions.addEventListener("click", (e) => {
+
+    const btn = e.target.closest(".admin-option");
+    if (!btn) return;
+
+    adminRarityOptions
+        .querySelectorAll(".admin-option")
+        .forEach(b => b.classList.remove("active"));
+
+    btn.classList.add("active");
+
+    adminForcedRarity =
+        btn.dataset.rarity === "random"
+            ? null
+            : btn.dataset.rarity;
+
+    updateAdminNote();
+
+});
+
+function openAdminModal() {
+
+    updateAdminNote();
+
+    adminOverlay.classList.add("show");
+
+}
+
+function closeAdminModal() {
+
+    adminOverlay.classList.remove("show");
+
+}
+
+adminClose.addEventListener("click", closeAdminModal);
+
+adminOverlay.addEventListener("click", (e) => {
+
+    if (e.target === adminOverlay) {
+        closeAdminModal();
+    }
+
+});
+
+adminRollBtn.addEventListener(
+    "click",
+    async () => {
+
+        if (generateButton.disabled || rerollButton.disabled) {
+            return;
+        }
+
+        closeAdminModal();
+
+        const isFirstRoll =
+            homeScreen.style.display !== "none";
+
+        if (isFirstRoll) {
+
+            generateButton.textContent = "ROLLING...";
+
+            await runRoll(true);
+
+            generateButton.textContent = "GENERATE";
+
+        } else {
+
+            rerollButton.textContent = "ROLLING...";
+
+            await runRoll(false);
+
+            rerollButton.textContent = "↻ REROLL";
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   FAN GAME DISCLAIMER
+
+   Shown every time the page loads or is refreshed —
+   this is an unofficial fan project, not the original.
+===================================================== */
+
+const disclaimerOverlay =
+    document.getElementById("disclaimerOverlay");
+
+const disclaimerClose =
+    document.getElementById("disclaimerClose");
+
+function closeDisclaimer() {
+
+    disclaimerOverlay.classList.remove("show");
+
+}
+
+disclaimerClose.addEventListener("click", closeDisclaimer);
+
+disclaimerOverlay.addEventListener("click", (e) => {
+
+    if (e.target === disclaimerOverlay) {
+        closeDisclaimer();
+    }
+
+});
+
+disclaimerOverlay.classList.add("show");
 
 
 /* =====================================================
