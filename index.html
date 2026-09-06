@@ -35,6 +35,7 @@
         --legendary: #ffb020;
         --mythical: #ef4fe0;
         --godly: #fff4c2;
+        --unlucky: #b23b3b;
     }
 
     html {
@@ -96,9 +97,6 @@
     .nav-right {
         display: flex;
         align-items: center;
-    }
-
-    .nav-left {
         gap: 11px;
     }
 
@@ -539,6 +537,32 @@
         }
     }
 
+    /*
+        UNLUCKY is the anti-godly: deliberately flat and
+        dim instead of triumphant. A faint, dying flicker
+        instead of a proud pulse.
+    */
+    .result-number.result-unlucky {
+        border-color: var(--unlucky);
+        color: var(--unlucky);
+        animation: unluckyFlicker 2.4s ease-in-out infinite;
+    }
+
+    @keyframes unluckyFlicker {
+        0%, 92%, 100% {
+            box-shadow: 0 0 8px rgba(178, 59, 59, 0.2);
+            opacity: 1;
+        }
+        94% {
+            box-shadow: none;
+            opacity: 0.85;
+        }
+        96% {
+            box-shadow: 0 0 4px rgba(178, 59, 59, 0.15);
+            opacity: 1;
+        }
+    }
+
     .result-digits {
         display: flex;
         justify-content: center;
@@ -648,6 +672,7 @@
     .rarity.rarity-legendary .rarity-label   { border-color: var(--legendary); color: var(--legendary); }
     .rarity.rarity-mythical .rarity-label    { border-color: var(--mythical);  color: var(--mythical); box-shadow: 0 0 14px rgba(239, 79, 224, 0.5); }
     .rarity.rarity-godly .rarity-label       { border-color: var(--godly);     color: var(--godly);    box-shadow: 0 0 16px rgba(255, 244, 194, 0.6); animation: godlyPulse 1.6s ease-in-out infinite; }
+    .rarity.rarity-unlucky .rarity-label     { border-color: var(--unlucky);   color: var(--unlucky); }
 
     .top-percent {
         color: #00d97e;
@@ -660,6 +685,7 @@
     .rarity.rarity-legendary .top-percent  { color: var(--legendary); }
     .rarity.rarity-mythical .top-percent   { color: var(--mythical); }
     .rarity.rarity-godly .top-percent      { color: var(--godly); }
+    .rarity.rarity-unlucky .top-percent    { color: var(--unlucky); }
 
     .result-xp {
         display: inline-block;
@@ -883,6 +909,7 @@
     .badge.legendary     { border-color: #7a5417; box-shadow: 0 0 16px rgba(255, 176, 32, 0.08); }
     .badge.mythical      { border-color: #7c2a76; box-shadow: 0 0 20px rgba(239, 79, 224, 0.16); }
     .badge.godly         { border-color: #cba750; animation: godlyPulse 1.6s ease-in-out infinite; }
+    .badge.unlucky       { border-color: #5c2222; }
 
     .badge-header {
         display: flex;
@@ -964,6 +991,14 @@
         border: 1px solid #cba750;
 
         font-weight: 900;
+    }
+
+    .badge-rarity.unlucky {
+        color: var(--unlucky);
+
+        background: rgba(178, 59, 59, 0.08);
+
+        border: 1px solid #5c2222;
     }
 
     .badge-xp {
@@ -1284,6 +1319,88 @@
         transform: translateY(-1px);
     }
 
+    /* =========================================
+       SETTINGS
+    ========================================= */
+
+    .settings-row {
+        margin-top: 18px;
+    }
+
+    .settings-row:first-of-type {
+        margin-top: 6px;
+    }
+
+    .settings-row-header {
+        display: flex;
+
+        align-items: baseline;
+        justify-content: space-between;
+
+        margin-bottom: 8px;
+    }
+
+    .settings-row-header .info-section-title {
+        margin: 0;
+    }
+
+    .settings-value {
+        color: #b98bff;
+
+        font-family: monospace;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .settings-slider {
+        -webkit-appearance: none;
+        appearance: none;
+
+        width: 100%;
+        height: 6px;
+
+        border-radius: 4px;
+
+        background: linear-gradient(90deg, #ff1795, #8b35ff);
+
+        outline: none;
+
+        cursor: pointer;
+    }
+
+    .settings-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+
+        width: 18px;
+        height: 18px;
+
+        border-radius: 50%;
+
+        border: 2px solid #15151a;
+
+        background: #f1f1f4;
+
+        cursor: pointer;
+
+        box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .settings-slider::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+
+        border-radius: 50%;
+
+        border: 2px solid #15151a;
+
+        background: #f1f1f4;
+
+        cursor: pointer;
+
+        box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+    }
+
     .admin-lock-input {
         width: 100%;
 
@@ -1546,7 +1663,7 @@
         </button>
 
         <button class="version-badge" id="changelogButton" title="Changelog" aria-label="Changelog">
-            v1.4
+            v1.5
         </button>
 
         <div class="nav-icon">
@@ -1557,6 +1674,10 @@
 
 
     <div class="nav-right">
+
+        <button class="nav-icon nav-icon-btn" id="settingsButton" title="Settings" aria-label="Settings">
+            ⚙
+        </button>
 
         <div class="theme-switcher">
 
@@ -1909,6 +2030,7 @@
                 <button class="admin-option" data-rarity="legendary" style="color:var(--legendary)">LEGENDARY</button>
                 <button class="admin-option" data-rarity="mythical" style="color:var(--mythical)">MYTHICAL</button>
                 <button class="admin-option" data-rarity="godly" style="color:var(--godly)" title="Secret tier — normally only reachable by rolling exactly 69, or a 1-digit glitch">GODLY 🔒</button>
+            <button class="admin-option" data-rarity="unlucky" style="color:var(--unlucky)" title="Secret tier — normally only reachable by rolling exactly 13">UNLUCKY 🔒</button>
 
             </div>
 
@@ -1948,8 +2070,17 @@
         </div>
 
         <div class="changelog-version">
-            <span class="changelog-version-number">v1.4</span>
+            <span class="changelog-version-number">v1.5</span>
             <span class="changelog-version-tag">CURRENT</span>
+        </div>
+
+        <ul class="changelog-list">
+            <li>Added a Settings menu (⚙, top right) with independent sliders for roll speed and badge reveal speed, 0.5x to 3x, plus a reset button.</li>
+            <li>Not every secret in this game is a good one. 💀</li>
+        </ul>
+
+        <div class="changelog-version">
+            <span class="changelog-version-number">v1.4</span>
         </div>
 
         <ul class="changelog-list">
@@ -2008,6 +2139,80 @@
             <li>Initial release: roll a random number, earn a handful of badges, and see your rarity.</li>
             <li>Included a "Today's Best Roll" leaderboard card, Sign In, Leaderboard, Share button, and a countdown to your next daily roll.</li>
         </ul>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     SETTINGS
+========================================= -->
+
+<div class="modal-overlay" id="settingsOverlay">
+
+    <div class="info-modal">
+
+        <div class="info-modal-header">
+
+            <span class="info-modal-title">
+                ⚙ SETTINGS
+            </span>
+
+            <button class="info-modal-close" id="settingsClose" aria-label="Close">
+                ✕
+            </button>
+
+        </div>
+
+        <p>
+            Speed up or slow down the roll and the badge reveal to
+            taste. Changes apply to your very next roll.
+        </p>
+
+        <div class="settings-row">
+
+            <div class="settings-row-header">
+                <span class="info-section-title">ROLL SPEED</span>
+                <span class="settings-value" id="rollSpeedValue">1x (Normal)</span>
+            </div>
+
+            <input
+                type="range"
+                class="settings-slider"
+                id="rollSpeedSlider"
+                min="0.5"
+                max="3"
+                step="0.25"
+                value="1"
+            >
+
+        </div>
+
+        <div class="settings-row">
+
+            <div class="settings-row-header">
+                <span class="info-section-title">BADGE REVEAL SPEED</span>
+                <span class="settings-value" id="badgeSpeedValue">1x (Normal)</span>
+            </div>
+
+            <input
+                type="range"
+                class="settings-slider"
+                id="badgeSpeedSlider"
+                min="0.5"
+                max="3"
+                step="0.25"
+                value="1"
+            >
+
+        </div>
+
+        <div class="admin-actions">
+            <button class="admin-roll-btn" id="settingsResetBtn" style="border-color:#55515d; background:#26242a; color:#bbb8c1;">
+                ↺ RESET TO DEFAULT
+            </button>
+        </div>
 
     </div>
 
@@ -2079,7 +2284,8 @@ const RARITY_XP = {
     rare: 1600,
     legendary: 4200,
     mythical: 12000,
-    godly: 1000000
+    godly: 1000000,
+    unlucky: 1
 };
 
 const RARITY_TOP_RANGE = {
@@ -2089,7 +2295,8 @@ const RARITY_TOP_RANGE = {
     rare:       [7, 22],
     legendary:  [1, 7],
     mythical:   [0.1, 1],
-    godly:      [0.0001, 0.001]
+    godly:      [0.0001, 0.001],
+    unlucky:    [99.9, 99.99]
 };
 
 /*
@@ -2100,12 +2307,19 @@ const RARITY_TOP_RANGE = {
     modal on purpose — the only ways to see it are
     rolling exactly 69, glitching all the way down to a
     single digit, or forcing it from the admin panel.
+
+    UNLUCKY is the same idea, but the opposite joke: it's
+    the rarest possible roll (exactly the two-digit number
+    13) and it's worth almost nothing — 1 DP flat, no
+    other badges. Also left out of RARITY_ORDER and the
+    public guide.
+
     DISPLAY_RARITIES is only for cosmetic
     bookkeeping (clearing/sorting classes) that does
-    need to know it exists.
+    need to know both of them exist.
 */
 const DISPLAY_RARITIES =
-    [...RARITY_ORDER, "godly"];
+    [...RARITY_ORDER, "godly", "unlucky"];
 
 /*
     Overall rarity is based on how much total DP
@@ -2162,6 +2376,17 @@ function maxRarity(a, b) {
 
 let lifetimeEP = 0;
 let sessionSpins = 0;
+
+/*
+    SETTINGS
+
+    Multipliers applied to the roll and badge-reveal
+    timing below. 1 = normal speed; higher divides the
+    base durations down (faster), lower stretches them
+    out (slower). Adjustable from the Settings modal.
+*/
+let rollSpeedMultiplier = 1;
+let badgeSpeedMultiplier = 1;
 
 function bumpSpinCount() {
 
@@ -2338,6 +2563,15 @@ function getNextNumber() {
     */
     if (adminForcedRarity === "godly") {
         return 69;
+    }
+
+    /*
+        Same idea as godly above, but for the unlucky
+        secret: force the actual number to 13 so the
+        badge's description stays truthful.
+    */
+    if (adminForcedRarity === "unlucky") {
+        return 13;
     }
 
     if (adminForcedDigits) {
@@ -3033,6 +3267,24 @@ badges.push(
         xp: RARITY_XP.godly,
         description: "SECRET: THE GLITCH ROLLED ALL THE WAY DOWN TO A SINGLE DIGIT.",
         test: (digits) => digits.length === 1,
+        highlight: (digits) => digits.map(() => true)
+    },
+    {
+        /*
+            SECRET, and the opposite joke from GODLY: this
+            is the ONLY badge you get if you roll exactly
+            the two-digit number 13 — every other badge is
+            stripped away (see calculateResult), and it's
+            worth exactly 1 DP. The rarest roll in the game,
+            and it's worth almost nothing.
+        */
+        id: "unlucky-13",
+        name: "UNLUCKY",
+        icon: "💀",
+        rarity: "unlucky",
+        xp: RARITY_XP.unlucky,
+        description: "SECRET: THE ENTIRE ROLL WAS EXACTLY 13. UNLUCKY.",
+        test: (digits, str, number) => digits.length === 2 && number === 13,
         highlight: (digits) => digits.map(() => true)
     },
 
@@ -4242,9 +4494,39 @@ function calculateResult(number, forcedRarity = null) {
 
     }
 
+    if (digits.length === 2 && number === 13) {
+
+        overallRarity = "unlucky";
+
+    }
+
     if (forcedRarity) {
 
         overallRarity = forcedRarity;
+
+    }
+
+
+    /*
+        UNLUCKY's whole joke is that it's the rarest
+        roll in the game and it's worth almost nothing.
+        So unlike every other tier, it strips away every
+        other badge that matched — no stacking, no bridge
+        badges, just this one, worth exactly 1 DP.
+    */
+
+    if (overallRarity === "unlucky") {
+
+        const unluckyBadge =
+            badges.find(b => b.id === "unlucky-13");
+
+        return {
+            digits,
+            str,
+            matched: [unluckyBadge],
+            totalXP: unluckyBadge.xp,
+            overallRarity
+        };
 
     }
 
@@ -4289,6 +4571,10 @@ function rollAnimation(number) {
 
         const target =
             String(number);
+
+        // higher multiplier = faster (durations divide down)
+        const scaled =
+            (ms) => ms / rollSpeedMultiplier;
 
         /*
             Always reveal as a full 6-digit spin
@@ -4358,7 +4644,7 @@ function rollAnimation(number) {
                         slot.remove();
                     });
 
-                }, 420);
+                }, scaled(420));
 
             }
 
@@ -4371,8 +4657,7 @@ function rollAnimation(number) {
             keptSlots.forEach((digit, index) => {
 
                 const spinTime =
-                    400 +
-                    index * (330 + 1000); // each digit now reveals 1s later than the one before it
+                    scaled(400 + index * (330 + 1000)); // each digit reveals ~1s later than the one before it, at normal speed
 
 
                 setTimeout(() => {
@@ -4398,7 +4683,7 @@ function rollAnimation(number) {
                             "locked"
                         );
 
-                    }, 300);
+                    }, scaled(300));
 
 
                     /*
@@ -4415,7 +4700,7 @@ function rollAnimation(number) {
 
                             resolve();
 
-                        }, 250);
+                        }, scaled(250));
 
                     }
 
@@ -4423,7 +4708,7 @@ function rollAnimation(number) {
 
             });
 
-        }, 1000);
+        }, scaled(1000));
 
     });
 
@@ -4505,8 +4790,12 @@ async function animateBadges(result) {
     badgeCountEl.textContent =
         `${result.matched.length} BADGES EARNED`;
 
+    // higher multiplier = faster (durations divide down)
+    const scaled =
+        (ms) => ms / badgeSpeedMultiplier;
 
-    await wait(BADGE_START_DELAY);
+
+    await wait(scaled(BADGE_START_DELAY));
 
 
     for (const badge of result.matched) {
@@ -4532,13 +4821,13 @@ async function animateBadges(result) {
 
         el.classList.add("badge-show");
 
-        await wait(BADGE_STEP_DELAY);
+        await wait(scaled(BADGE_STEP_DELAY));
 
     }
 
 
     // let the best badge sit in the spotlight a moment, then join the list too
-    await wait(BADGE_TRANSITION_MS);
+    await wait(scaled(BADGE_TRANSITION_MS));
 
     const last = badgeSpotlight.firstElementChild;
 
@@ -4910,6 +5199,10 @@ document.addEventListener("keydown", (e) => {
             closeChangelog();
         }
 
+        if (settingsOverlay.classList.contains("show")) {
+            closeSettings();
+        }
+
         return;
 
     }
@@ -5049,6 +5342,17 @@ function updateAdminNote() {
         adminNote.textContent =
             "Next roll: forced to GODLY — the number will always be exactly 69, " +
             "regardless of the digit count selected above.";
+
+        return;
+
+    }
+
+    if (adminForcedRarity === "unlucky") {
+
+        adminNote.textContent =
+            "Next roll: forced to UNLUCKY — the number will always be exactly 13, " +
+            "regardless of the digit count selected above, and every other badge is " +
+            "stripped away (worth exactly 1 DP).";
 
         return;
 
@@ -5278,12 +5582,135 @@ changelogOverlay.addEventListener("click", (e) => {
 
 
 /* =====================================================
+   SETTINGS
+
+   Lets you speed up or slow down the roll and the
+   badge reveal independently. Both are multipliers
+   read by rollAnimation()/animateBadges() — 1 is
+   normal, higher divides the base durations down
+   (faster), lower stretches them out (slower).
+===================================================== */
+
+const settingsButton =
+    document.getElementById("settingsButton");
+
+const settingsOverlay =
+    document.getElementById("settingsOverlay");
+
+const settingsClose =
+    document.getElementById("settingsClose");
+
+const rollSpeedSlider =
+    document.getElementById("rollSpeedSlider");
+
+const rollSpeedValueEl =
+    document.getElementById("rollSpeedValue");
+
+const badgeSpeedSlider =
+    document.getElementById("badgeSpeedSlider");
+
+const badgeSpeedValueEl =
+    document.getElementById("badgeSpeedValue");
+
+const settingsResetBtn =
+    document.getElementById("settingsResetBtn");
+
+
+function speedLabel(multiplier) {
+
+    if (multiplier <= 0.75) return "Slow";
+    if (multiplier < 1.25) return "Normal";
+    if (multiplier < 1.75) return "Fast";
+    if (multiplier < 2.5) return "Very Fast";
+
+    return "Instant-ish";
+
+}
+
+function formatMultiplier(multiplier) {
+
+    return `${multiplier}x (${speedLabel(multiplier)})`;
+
+}
+
+function updateRollSpeedLabel() {
+
+    rollSpeedValueEl.textContent =
+        formatMultiplier(rollSpeedMultiplier);
+
+}
+
+function updateBadgeSpeedLabel() {
+
+    badgeSpeedValueEl.textContent =
+        formatMultiplier(badgeSpeedMultiplier);
+
+}
+
+rollSpeedSlider.addEventListener("input", () => {
+
+    rollSpeedMultiplier =
+        Number(rollSpeedSlider.value);
+
+    updateRollSpeedLabel();
+
+});
+
+badgeSpeedSlider.addEventListener("input", () => {
+
+    badgeSpeedMultiplier =
+        Number(badgeSpeedSlider.value);
+
+    updateBadgeSpeedLabel();
+
+});
+
+settingsResetBtn.addEventListener("click", () => {
+
+    rollSpeedMultiplier = 1;
+    badgeSpeedMultiplier = 1;
+
+    rollSpeedSlider.value = "1";
+    badgeSpeedSlider.value = "1";
+
+    updateRollSpeedLabel();
+    updateBadgeSpeedLabel();
+
+});
+
+function openSettings() {
+
+    settingsOverlay.classList.add("show");
+
+}
+
+function closeSettings() {
+
+    settingsOverlay.classList.remove("show");
+
+}
+
+settingsButton.addEventListener("click", openSettings);
+
+settingsClose.addEventListener("click", closeSettings);
+
+settingsOverlay.addEventListener("click", (e) => {
+
+    if (e.target === settingsOverlay) {
+        closeSettings();
+    }
+
+});
+
+
+/* =====================================================
    INITIAL STATE
 ===================================================== */
 
 createRollingDigits();
 
 hideRarity();
+
 
 </script>
 
